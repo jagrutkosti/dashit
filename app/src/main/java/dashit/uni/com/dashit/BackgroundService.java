@@ -4,41 +4,60 @@
 
 package dashit.uni.com.dashit;
 
+import android.app.IntentService;
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
-import android.os.AsyncTask;
+import android.graphics.PixelFormat;
+import android.hardware.Camera;
+import android.media.CamcorderProfile;
+import android.media.MediaRecorder;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.ResultReceiver;
 import android.support.annotation.Nullable;
+import android.util.Log;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
+import android.widget.Toast;
 
-public class BackgroundService extends Service implements SensorEventListener {
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
-    private SensorManager manager = null;
-    private Sensor sensor = null;
-    private long lastUpdate = 0;
-    private float last_x, last_y, last_z;
-    private static final int SHAKE_THRESHOLD = 600;
+public class BackgroundService extends IntentService {
 
-    ResultReceiver resultReceiver;
+    public BackgroundService(){
+        super("BackgroundService");
+    }
+
+    private static final String TAG = "RecorderService";
+    private SurfaceView mSurfaceView;
+    private SurfaceHolder mSurfaceHolder;
+    private static Camera mServiceCamera;
+    private boolean mRecordingStatus;
+    private MediaRecorder mMediaRecorder;
+    static boolean status = false;
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId){
-        resultReceiver = intent.getParcelableExtra("receiver");
+    public void onCreate() {
+        /*mRecordingStatus = false;
+        //mServiceCamera = CameraRecorder.mCamera;
+        mServiceCamera = Camera.open(1);
+        mSurfaceView = HomeActivity.mSurfaceView;
+        mSurfaceHolder = HomeActivity.mSurfaceHolder;*/
 
-        manager = (SensorManager)getSystemService(SENSOR_SERVICE);
-        sensor = manager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        boolean sensorAvailable = manager.registerListener(this,sensor,SensorManager.SENSOR_DELAY_FASTEST);
-        if(sensorAvailable){
-            System.out.println("Sensor available");
-        }else{
-            System.out.println("Some problem when retrieving the sensor.");
-        }
-        return START_STICKY;
+        super.onCreate();
+    }
+
+    @Override
+        public void onDestroy() {
+        //stopRecording();
+        super.onDestroy();
     }
 
     @Nullable
@@ -48,56 +67,126 @@ public class BackgroundService extends Service implements SensorEventListener {
     }
 
     @Override
-    public void onSensorChanged(SensorEvent event) {
+    protected void onHandleIntent(Intent intent) {
+        while(!status){
+            /*File file;
+            file = new File("/sdcard/dashit1.mp4");
+            file.delete();
+            file = new File("/sdcard/dashit2.mp4");
+            file.delete();
+            file = new File("/sdcard/dashit3.mp4");
+            file.delete();*/
 
-        float x = event.values[0];
-        float y = event.values[1];
-        float z = event.values[2];
+            int i =1;
+            while(i < 4) {
+                if (!status) {
+                    //mServiceCamera = CameraRecorder.mCamera;
+                    //mServiceCamera = Camera.open(1);
+                    mSurfaceView = HomeActivity.mSurfaceView;
+                    mSurfaceHolder = HomeActivity.mSurfaceHolder;
+                    startRecording("dashit" + i);
+                    try {
+                        Thread.sleep(5000);
+                        stopRecording();
 
-        long curTime = System.currentTimeMillis();
-
-        if ((curTime - lastUpdate) > 100) {
-            long diffTime = (curTime - lastUpdate);
-            lastUpdate = curTime;
-
-            /*float speed = Math.abs(x + y + z - last_x - last_y - last_z)/ diffTime * 10000;*/
-
-
-            if(Math.abs(x-last_x) > 8 || Math.abs(y-last_y) > 8 || Math.abs(z-last_z) > 8){
-                Bundle bundle  = new Bundle();
-                bundle.putString("state","Accident!!!");
-                resultReceiver.send(100,bundle);
-            }else{
-                Bundle bundle  = new Bundle();
-                bundle.putString("state","You are good!!!");
-                resultReceiver.send(100,bundle);
-            }
-
-            last_x = x;
-            last_y = y;
-            last_z = z;
-        }
-        new SensorEventLoggerTask().execute(event);
-        stopSelf();
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
-    }
-
-    public class SensorEventLoggerTask extends AsyncTask<SensorEvent, Void, Void>{
-        @Override
-        public Void doInBackground(SensorEvent... events) {
-            for(int i=0;i<events.length;i++){
-                SensorEvent event = events[i];
-                for(int j=0;j<event.values.length;j++){
-                    System.out.println("Sensor Data::"+event.values[i]);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    i++;
+                }else{
+                    break;
                 }
             }
-            return null;
+        }
+        mSurfaceView = HomeActivity.mSurfaceView;
+        mSurfaceHolder = HomeActivity.mSurfaceHolder;
+        startRecording("dashit4");
+        try {
+            Thread.sleep(5000);
+            stopRecording();
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
+    public boolean startRecording(String fileName){
+        try {
+            //Toast.makeText(getBaseContext(), "Recording Started", Toast.LENGTH_SHORT).show();
 
+            mServiceCamera = Camera.open();
+            Camera.Parameters params = mServiceCamera.getParameters();
+            mServiceCamera.setParameters(params);
+            Camera.Parameters p = mServiceCamera.getParameters();
+
+            final List<Camera.Size> listSize = p.getSupportedPreviewSizes();
+            Camera.Size mPreviewSize = listSize.get(2);
+            Log.v(TAG, "use: width = " + mPreviewSize.width
+                    + " height = " + mPreviewSize.height);
+            p.setPreviewSize(mPreviewSize.width, mPreviewSize.height);
+            p.setPreviewFormat(PixelFormat.YCbCr_420_SP);
+            mServiceCamera.setParameters(p);
+            mServiceCamera.setDisplayOrientation(90);
+            try {
+                mServiceCamera.setPreviewDisplay(mSurfaceHolder);
+                mServiceCamera.startPreview();
+            }
+            catch (IOException e) {
+                Log.e(TAG, e.getMessage());
+                e.printStackTrace();
+            }
+
+            mServiceCamera.unlock();
+
+            mMediaRecorder = new MediaRecorder();
+            mMediaRecorder.setCamera(mServiceCamera);
+            mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
+            mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
+            mMediaRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_480P));
+            //mMediaRecorder.setMaxDuration(10000);
+            mMediaRecorder.setOutputFile("/sdcard/" + fileName + ".mp4");
+
+            mMediaRecorder.setPreviewDisplay(mSurfaceHolder.getSurface());
+
+            mMediaRecorder.prepare();
+            mMediaRecorder.start();
+
+            return true;
+        } catch (IllegalStateException e) {
+            Log.d(TAG, e.getMessage());
+            e.printStackTrace();
+            return false;
+        } catch (IOException e) {
+            Log.d(TAG, e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public void stopRecording() {
+        //Toast.makeText(getBaseContext(), "Recording Stopped", Toast.LENGTH_SHORT).show();
+        try {
+            mServiceCamera.reconnect();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        mMediaRecorder.stop();
+        mMediaRecorder.reset();
+
+        mServiceCamera.stopPreview();
+        mMediaRecorder.release();
+
+        mServiceCamera.release();
+        mServiceCamera = null;
+    }
+
+    public static class MyBroadcastReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            System.out.println("Accident!!");
+            status = true;
+        }
+    }
 }
