@@ -5,7 +5,6 @@
 package dashit.uni.com.dashit;
 
 import android.app.IntentService;
-import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -13,21 +12,26 @@ import android.graphics.PixelFormat;
 import android.hardware.Camera;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
-import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.ResultReceiver;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.widget.Toast;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class BackgroundService extends IntentService {
 
@@ -41,23 +45,22 @@ public class BackgroundService extends IntentService {
     private static Camera mServiceCamera;
     private boolean mRecordingStatus;
     private MediaRecorder mMediaRecorder;
-    static boolean status = false;
+    static boolean accidentStatus = false;
+    boolean manualStopStatus = false;
+    int accidentOnVideoIndex = 0;
 
     @Override
     public void onCreate() {
-        /*mRecordingStatus = false;
-        //mServiceCamera = CameraRecorder.mCamera;
-        mServiceCamera = Camera.open(1);
-        mSurfaceView = HomeActivity.mSurfaceView;
-        mSurfaceHolder = HomeActivity.mSurfaceHolder;*/
-
         super.onCreate();
     }
 
     @Override
-        public void onDestroy() {
-        //stopRecording();
+    public void onDestroy() {
         super.onDestroy();
+        manualStopStatus = true;
+        if(mRecordingStatus){
+            stopRecording();
+        }
     }
 
     @Nullable
@@ -68,18 +71,11 @@ public class BackgroundService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        while(!status){
-            /*File file;
-            file = new File("/sdcard/dashit1.mp4");
-            file.delete();
-            file = new File("/sdcard/dashit2.mp4");
-            file.delete();
-            file = new File("/sdcard/dashit3.mp4");
-            file.delete();*/
-
+        while(!accidentStatus){
             int i =1;
-            while(i < 4) {
-                if (!status) {
+            while(i < 3) {
+                if (!accidentStatus && !manualStopStatus) {
+                    accidentOnVideoIndex = i;
                     //mServiceCamera = CameraRecorder.mCamera;
                     //mServiceCamera = Camera.open(1);
                     mSurfaceView = HomeActivity.mSurfaceView;
@@ -87,7 +83,8 @@ public class BackgroundService extends IntentService {
                     startRecording("dashit" + i);
                     try {
                         Thread.sleep(5000);
-                        stopRecording();
+                        if(mRecordingStatus)
+                            stopRecording();
 
                     } catch (InterruptedException e) {
                         e.printStackTrace();
@@ -98,22 +95,24 @@ public class BackgroundService extends IntentService {
                 }
             }
         }
-        mSurfaceView = HomeActivity.mSurfaceView;
-        mSurfaceHolder = HomeActivity.mSurfaceHolder;
-        startRecording("dashit4");
-        try {
-            Thread.sleep(5000);
-            stopRecording();
-
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        if(!manualStopStatus) {
+            mSurfaceView = HomeActivity.mSurfaceView;
+            mSurfaceHolder = HomeActivity.mSurfaceHolder;
+            startRecording("dashit3");
+            try {
+                Thread.sleep(5000);
+                stopRecording();
+                generateHash();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 
     public boolean startRecording(String fileName){
         try {
             //Toast.makeText(getBaseContext(), "Recording Started", Toast.LENGTH_SHORT).show();
-
+            mRecordingStatus = true;
             mServiceCamera = Camera.open();
             Camera.Parameters params = mServiceCamera.getParameters();
             mServiceCamera.setParameters(params);
@@ -165,6 +164,7 @@ public class BackgroundService extends IntentService {
 
     public void stopRecording() {
         //Toast.makeText(getBaseContext(), "Recording Stopped", Toast.LENGTH_SHORT).show();
+        mRecordingStatus = false;
         try {
             mServiceCamera.reconnect();
         } catch (IOException e) {
@@ -181,12 +181,85 @@ public class BackgroundService extends IntentService {
         mServiceCamera = null;
     }
 
+    public void generateHash(){
+        int[] orderOfVideo = new int[3];
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        if(accidentOnVideoIndex == 2){
+            orderOfVideo[0] = 1;
+            orderOfVideo[1] = 2;
+            orderOfVideo[2] = 3;
+        }else{
+            orderOfVideo[0] = 2;
+            orderOfVideo[1] = 1;
+            orderOfVideo[2] = 3;
+        }
+        for(int i=0;i<3;i++){
+            File file = new File("/sdcard/dashit"+orderOfVideo[i]+".mp4");
+            if(file.exists() && !file.isDirectory()){
+                byte[] byteArray = new byte[(int)file.length()];
+                FileInputStream fileInputStream;
+                try {
+                    fileInputStream = new FileInputStream(file);
+                    fileInputStream.read(byteArray);
+                    System.out.println("File length::"+byteArray.length);
+                    outputStream.write(byteArray);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        byte[] finalByte = outputStream.toByteArray();
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            md.update(finalByte);
+            byte[] mdBytes = md.digest();
+            StringBuffer hexString = new StringBuffer();
+            for (int i=0;i<mdBytes.length;i++) {
+                hexString.append(Integer.toHexString(0xFF & mdBytes[i]));
+            }
+            System.out.println("Hex format : " + hexString.toString());
+            sendHashToServer(hexString.toString());
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void sendHashToServer(String hashString){
+        String url = "http://www.originstamp.org/api/stamps";
+        String postData = "{\"hash_sha256\" : \""+hashString+"\"}";
+        try {
+            URL obj = new URL(url);
+            HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+            con.setRequestMethod("POST");
+            con.setRequestProperty("Content-Type", "application/json");
+            con.setRequestProperty("Authorization", "Token token=\"a876e0bbb8894e8c8eadc5b3a19adff7\"");
+            con.setRequestProperty("User-Agent","Mozilla/5.0 ( compatible ) ");
+            con.setRequestProperty("Accept","*/*");
+            DataOutputStream dos = new DataOutputStream(con.getOutputStream());
+            dos.writeBytes(postData);
+            dos.flush();
+            dos.close();
+            String line;
+            BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            while ((line = reader.readLine()) != null) {
+                System.out.println(line);
+            }
+            reader.close();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static class MyBroadcastReceiver extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context context, Intent intent) {
             System.out.println("Accident!!");
-            status = true;
+            accidentStatus = true;
         }
     }
 }

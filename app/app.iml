@@ -92,6 +92,7 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="support-annotations-22.1.1" level="project" />
     <orderEntry type="library" exported="" name="support-v4-22.1.1" level="project" />
+    <orderEntry type="library" exported="" name="isoviewer-1.0-RC-35" level="project" />
     <orderEntry type="library" exported="" name="appcompat-v7-22.1.1" level="project" />
   </component>
 </module>

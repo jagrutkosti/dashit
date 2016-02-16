@@ -1,7 +1,6 @@
 package dashit.uni.com.dashit;
 
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Handler;
 import android.os.ResultReceiver;
@@ -42,14 +41,14 @@ public class HomeActivity extends AppCompatActivity implements SurfaceHolder.Cal
         Button btnStart = (Button) findViewById(R.id.start);
         btnStart.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Intent intent = new Intent(HomeActivity.this, BackgroundService.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startService(intent);
-
                 Intent intent2 = new Intent(HomeActivity.this, SensorService.class);
                 intent2.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 intent2.putExtra("receiver", resultReceiver);
                 startService(intent2);
+
+                Intent intent = new Intent(HomeActivity.this, BackgroundService.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startService(intent);
             }
         });
 
