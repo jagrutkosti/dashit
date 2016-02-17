@@ -8,21 +8,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.View;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
-public class HomeActivity extends AppCompatActivity implements SurfaceHolder.Callback{
+public class HomeActivity extends AppCompatActivity /*implements SurfaceHolder.Callback*/{
 
-    //Camera
     TextView txtView;
     MyResultReceiver resultReceiver;
-
-    private static final String TAG = "Recorder";
-    public static SurfaceView mSurfaceView;
-    public static SurfaceHolder mSurfaceHolder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,31 +25,13 @@ public class HomeActivity extends AppCompatActivity implements SurfaceHolder.Cal
         //Camera
         resultReceiver = new MyResultReceiver(null);
         txtView = (TextView)findViewById(R.id.accData);
-        mSurfaceView = (SurfaceView) findViewById(R.id.surfaceView1);
-        mSurfaceHolder = mSurfaceView.getHolder();
-        mSurfaceHolder.addCallback(this);
-        mSurfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
-
-        Button btnStart = (Button) findViewById(R.id.start);
+        ImageButton btnStart = (ImageButton) findViewById(R.id.start);
         btnStart.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Intent intent2 = new Intent(HomeActivity.this, SensorService.class);
-                intent2.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent2.putExtra("receiver", resultReceiver);
-                startService(intent2);
-
-                Intent intent = new Intent(HomeActivity.this, BackgroundService.class);
+                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startService(intent);
-            }
-        });
-
-        Button btnStop = (Button) findViewById(R.id.stop);
-        btnStop.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                stopService(new Intent(HomeActivity.this, BackgroundService.class));
-                stopService(new Intent(HomeActivity.this, SensorService.class));
+                startActivity(intent);
             }
         });
     }
@@ -77,25 +52,13 @@ public class HomeActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent intent = new Intent(getApplicationContext(), HistoryActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
             return true;
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void surfaceCreated(SurfaceHolder holder) {
-
-    }
-
-    @Override
-    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-
-    }
-
-    @Override
-    public void surfaceDestroyed(SurfaceHolder holder) {
-
     }
 
     class MyResultReceiver extends ResultReceiver{

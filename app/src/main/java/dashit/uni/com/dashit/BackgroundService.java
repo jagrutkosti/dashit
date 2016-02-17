@@ -12,11 +12,14 @@ import android.graphics.PixelFormat;
 import android.hardware.Camera;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -24,13 +27,18 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Date;
 import java.util.List;
 
 public class BackgroundService extends IntentService {
@@ -48,10 +56,16 @@ public class BackgroundService extends IntentService {
     static boolean accidentStatus = false;
     boolean manualStopStatus = false;
     int accidentOnVideoIndex = 0;
+    Handler handler;
 
     @Override
     public void onCreate() {
         super.onCreate();
+        handler = new Handler();
+        for(int i = 1;i<4;i++){
+            File delPreviousFiles = new File("/sdcard/dashit"+i+".mp4");
+            delPreviousFiles.delete();
+        }
     }
 
     @Override
@@ -78,8 +92,8 @@ public class BackgroundService extends IntentService {
                     accidentOnVideoIndex = i;
                     //mServiceCamera = CameraRecorder.mCamera;
                     //mServiceCamera = Camera.open(1);
-                    mSurfaceView = HomeActivity.mSurfaceView;
-                    mSurfaceHolder = HomeActivity.mSurfaceHolder;
+                    mSurfaceView = MainActivity.mSurfaceView;
+                    mSurfaceHolder = MainActivity.mSurfaceHolder;
                     startRecording("dashit" + i);
                     try {
                         Thread.sleep(5000);
@@ -96,8 +110,8 @@ public class BackgroundService extends IntentService {
             }
         }
         if(!manualStopStatus) {
-            mSurfaceView = HomeActivity.mSurfaceView;
-            mSurfaceHolder = HomeActivity.mSurfaceHolder;
+            mSurfaceView = MainActivity.mSurfaceView;
+            mSurfaceHolder = MainActivity.mSurfaceHolder;
             startRecording("dashit3");
             try {
                 Thread.sleep(5000);
@@ -187,22 +201,38 @@ public class BackgroundService extends IntentService {
         if(accidentOnVideoIndex == 2){
             orderOfVideo[0] = 1;
             orderOfVideo[1] = 2;
-            orderOfVideo[2] = 3;
         }else{
             orderOfVideo[0] = 2;
             orderOfVideo[1] = 1;
-            orderOfVideo[2] = 3;
         }
+        orderOfVideo[2] = 3;
+
+        File dir = new File("/sdcard/dashitHistory/"+ DateFormat.format("dd-MM-yyyy HH:mm", new Date().getTime()));
+        if(!dir.isDirectory())
+            dir.mkdirs();
+        File saveFile;
         for(int i=0;i<3;i++){
             File file = new File("/sdcard/dashit"+orderOfVideo[i]+".mp4");
             if(file.exists() && !file.isDirectory()){
                 byte[] byteArray = new byte[(int)file.length()];
-                FileInputStream fileInputStream;
+                InputStream fileInputStream;
                 try {
                     fileInputStream = new FileInputStream(file);
                     fileInputStream.read(byteArray);
-                    System.out.println("File length::"+byteArray.length);
+                    System.out.println("File length::" + byteArray.length);
                     outputStream.write(byteArray);
+                    fileInputStream.close();
+
+                    fileInputStream = new FileInputStream(file);
+                    saveFile = new File(dir.getPath()+"/"+(i+1)+"accVideo"+orderOfVideo[i]+".mp4");
+                    OutputStream out = new FileOutputStream(saveFile);
+                    byte[] buf = new byte[1024];
+                    int len;
+                    while ((len = fileInputStream.read(buf)) > 0) {
+                        out.write(buf, 0, len);
+                    }
+                    fileInputStream.close();
+                    out.close();
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 } catch (IOException e) {
@@ -211,6 +241,7 @@ public class BackgroundService extends IntentService {
             }
         }
         byte[] finalByte = outputStream.toByteArray();
+        System.out.println("Final Byte Array Length::"+finalByte.length);
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             md.update(finalByte);
@@ -220,8 +251,18 @@ public class BackgroundService extends IntentService {
                 hexString.append(Integer.toHexString(0xFF & mdBytes[i]));
             }
             System.out.println("Hex format : " + hexString.toString());
+
+            //Create a hash.txt file
+            File hash = new File(dir.getPath()+"/hash.txt");
+            FileWriter writer = new FileWriter(hash);
+            writer.append(hexString.toString());
+            writer.flush();
+            writer.close();
+
             sendHashToServer(hexString.toString());
         } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -247,10 +288,29 @@ public class BackgroundService extends IntentService {
                 System.out.println(line);
             }
             reader.close();
+
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(BackgroundService.this, "Hash sent successfully!", Toast.LENGTH_LONG).show();
+                }
+            });
         } catch (MalformedURLException e) {
             e.printStackTrace();
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(BackgroundService.this, "Problems while sending hash. Please check you internet connection.", Toast.LENGTH_LONG).show();
+                }
+            });
         } catch (IOException e) {
             e.printStackTrace();
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(BackgroundService.this, "Problems while sending hash. Please check you internet connection.", Toast.LENGTH_LONG).show();
+                }
+            });
         }
     }
 

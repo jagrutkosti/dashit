@@ -20,7 +20,7 @@ public class SensorService extends Service implements SensorEventListener {
     private SensorManager manager = null;
     private Sensor sensor = null;
     private long lastUpdate = 0;
-    private float last_x, last_y, last_z;
+    private float last_x = 6.0f, last_y = 6.0f, last_z = 6.0f;
     ResultReceiver resultReceiver;
 
     public int onStartCommand(Intent intent, int flags, int startId){
@@ -63,10 +63,6 @@ public class SensorService extends Service implements SensorEventListener {
                 intent.setAction("com.example.Broadcast");
                 intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
                 sendBroadcast(intent);
-            }else{
-                Bundle bundle  = new Bundle();
-                bundle.putString("state","You are good!!!");
-                resultReceiver.send(100,bundle);
             }
 
             last_x = x;

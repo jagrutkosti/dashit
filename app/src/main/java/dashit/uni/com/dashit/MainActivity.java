@@ -6,24 +6,30 @@ package dashit.uni.com.dashit;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.media.Image;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SurfaceHolder.Callback{
 
     TextView txtView;
-    Intent intent;
     MyResultReceiver resultReceiver;
-    Button button;
+    ImageView imgView;
 
-    //Camera variables
+    private static final String TAG = "Recorder";
+    public static SurfaceView mSurfaceView;
+    public static SurfaceHolder mSurfaceHolder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,46 +37,47 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //Camera code starts
-        //Camera code ends
-
         resultReceiver = new MyResultReceiver(null);
         txtView = (TextView)findViewById(R.id.accData);
+        imgView = (ImageView)findViewById(R.id.likeacc);
 
-        intent = new Intent(this, BackgroundService.class );
+        mSurfaceView = (SurfaceView) findViewById(R.id.surfaceView1);
+        mSurfaceHolder = mSurfaceView.getHolder();
+        mSurfaceHolder.addCallback(this);
+        mSurfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+
+        Intent intent2 = new Intent(MainActivity.this, SensorService.class);
+        intent2.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent2.putExtra("receiver", resultReceiver);
+        startService(intent2);
+
+        Intent intent = new Intent(MainActivity.this, BackgroundService.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra("receiver", resultReceiver);
         startService(intent);
-        //finish();
-        button = (Button)findViewById(R.id.stopRecording);
 
-        button.setOnClickListener(new View.OnClickListener() {
+        ImageButton btnStop = (ImageButton) findViewById(R.id.stop);
+        btnStop.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                stopService(new Intent(MainActivity.this, BackgroundService.class));
+                stopService(new Intent(MainActivity.this, SensorService.class));
                 System.exit(0);
             }
         });
     }
 
-
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_home, menu);
-        return true;
+    public void surfaceCreated(SurfaceHolder holder) {
+
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void surfaceDestroyed(SurfaceHolder holder) {
+
     }
 
     class MyResultReceiver extends ResultReceiver{
@@ -101,8 +108,10 @@ public class MainActivity extends AppCompatActivity {
             this.updateString = updateString;
         }
         public void run() {
-            if(updateString.equalsIgnoreCase("Accident!!!"))
+            if(updateString.equalsIgnoreCase("Accident!!!")) {
                 txtView.setTextColor(Color.parseColor("red"));
+                imgView.setBackgroundResource(R.drawable.carcollision);
+            }
             else
                 txtView.setTextColor(Color.parseColor("black"));
             txtView.setText(updateString);
