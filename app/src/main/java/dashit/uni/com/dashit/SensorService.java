@@ -23,29 +23,10 @@ public class SensorService extends IntentService implements SensorEventListener 
     private long lastUpdate = 0;
     private float last_x = 6.0f, last_y = 6.0f, last_z = 6.0f;
 
-    /**
-     * Creates an IntentService.  Invoked by your subclass's constructor.
-     *
-     * @param name Used to name the worker thread, important only for debugging.
-     */
+
     public SensorService() {
         super("SensorService");
     }
-
-    /*public int onStartCommand(Intent intent, int flags, int startId){
-        resultReceiver = intent.getParcelableExtra("receiver");
-
-        manager = (SensorManager)getSystemService(SENSOR_SERVICE);
-        sensor = manager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        boolean sensorAvailable = manager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_FASTEST);
-        if(sensorAvailable){
-            System.out.println("Sensor available");
-        }else{
-            System.out.println("Some problem when retrieving the sensor.");
-        }
-
-        return START_STICKY;
-    }*/
 
     @Override
     public void onSensorChanged(SensorEvent event) {

@@ -22,15 +22,21 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity implements SurfaceHolder.Callback{
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.MapsInitializer;
+import com.google.android.gms.maps.model.LatLng;
+
+public class MainActivity extends AppCompatActivity{
 
     static TextView txtView;
     static ImageView imgView;
-
-    private static final String TAG = "Recorder";
-    public static SurfaceView mSurfaceView;
-    public static SurfaceHolder mSurfaceHolder;
+    private GoogleMap googleMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,11 +46,6 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
         txtView = (TextView)findViewById(R.id.accData);
         imgView = (ImageView)findViewById(R.id.likeacc);
-
-        mSurfaceView = (SurfaceView) findViewById(R.id.surfaceView1);
-        mSurfaceHolder = mSurfaceView.getHolder();
-        mSurfaceHolder.addCallback(this);
-        mSurfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
         Intent intent2 = new Intent(MainActivity.this, SensorService.class);
         intent2.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -62,20 +63,38 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                 System.exit(0);
             }
         });
+
+        try {
+            initializeMap();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void initializeMap() {
+        if (googleMap == null) {
+            googleMap = ((MapFragment) getFragmentManager().findFragmentById(
+                    R.id.map)).getMap();
+
+            // check if map is created successfully or not
+            if (googleMap == null) {
+                Toast.makeText(getApplicationContext(),
+                        "Sorry! unable to create maps", Toast.LENGTH_SHORT)
+                        .show();
+            }
+            googleMap.getUiSettings().setMyLocationButtonEnabled(true);
+            googleMap.setMyLocationEnabled(true);
+            MapsInitializer.initialize(this);
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(new LatLng(47.66, 9.18), 10);
+            googleMap.animateCamera(cameraUpdate);
+        }
     }
 
     @Override
-    public void surfaceCreated(SurfaceHolder holder) {
-
-    }
-
-    @Override
-    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-    }
-
-    @Override
-    public void surfaceDestroyed(SurfaceHolder holder) {
-
+    protected void onResume() {
+        super.onResume();
+        initializeMap();
     }
 
     public static class MyBroadcastReceiver extends BroadcastReceiver {

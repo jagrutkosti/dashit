@@ -68,7 +68,6 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
     SurfaceHolder globalHolder;
     Thread thread = null;
 
-
     @Override
     public void onCreate() {
         super.onCreate();
@@ -77,8 +76,6 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
             File delPreviousFiles = new File("/sdcard/dashit" + i + ".mp4");
             delPreviousFiles.delete();
         }
-        mSurfaceView = MainActivity.mSurfaceView;
-        mSurfaceHolder = MainActivity.mSurfaceHolder;
 
         // Start foreground service to avoid unexpected kill
         Notification notification = new Notification.Builder(this)
@@ -97,7 +94,7 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
                 WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
                 PixelFormat.TRANSLUCENT
         );
-        layoutParams.gravity = Gravity.LEFT | Gravity.TOP;
+        layoutParams.gravity = Gravity.TOP | Gravity.LEFT;
         windowManager.addView(surfaceView, layoutParams);
         surfaceView.getHolder().addCallback(this);
     }
@@ -128,11 +125,6 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
         mediaRecorder = new MediaRecorder();
         camera.setDisplayOrientation(90);
         camera.unlock();
-        /*if(mSurfaceHolder!=null && mSurfaceView!=null){
-            mediaRecorder.setPreviewDisplay(mSurfaceHolder.getSurface());
-        }else{
-            mediaRecorder.setPreviewDisplay(globalHolder.getSurface());
-        }*/
 
         mediaRecorder.setPreviewDisplay(globalHolder.getSurface());
         mediaRecorder.setCamera(camera);
@@ -288,7 +280,7 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
                             accidentOnVideoIndex = i;
                             startRecording("dashit" + i);
                             try {
-                                Thread.sleep(5000);
+                                Thread.sleep(10000);
                                 if(recordingStatus)
                                     stopRecording();
 
@@ -305,7 +297,7 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
 
                     startRecording("dashit3");
                     try {
-                        Thread.sleep(5000);
+                        Thread.sleep(10000);
                         stopRecording();
                         generateHash();
                     } catch (InterruptedException e) {

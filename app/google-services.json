@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_id": "dashit-834e1",
+    "project_number": "481421819080",
+    "name": "DashIt"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:481421819080:android:f37d2d2d150f644c",
+        "client_id": "android:dashit.uni.com.dashit",
+        "client_type": 1,
+        "android_client_info": {
+          "package_name": "dashit.uni.com.dashit"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "481421819080-6kqi909763p0s81a6dn3cu10ls6nt6ks.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "dashit.uni.com.dashit",
+            "certificate_hash": "A079E711AFEECF40C88EEB06197404F2841C1124"
+          }
+        },
+        {
+          "client_id": "481421819080-fc16jopgt5tjt4v5mvfjuas646v0edan.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "cloud_messaging_service": {
+          "status": 1,
+          "apns_config": []
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "google_signin_service": {
+          "status": 2
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "client_info": [],
+  "ARTIFACT_VERSION": "1"
+}
