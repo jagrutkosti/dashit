@@ -1,5 +1,6 @@
 package dashit.uni.com.dashit;
 
+import android.app.IntentService;
 import android.app.Service;
 import android.content.Intent;
 import android.hardware.Sensor;
@@ -15,20 +16,28 @@ import android.support.annotation.Nullable;
 /**
  * Created by Jagrut on 13-Feb-16.
  */
-public class SensorService extends Service implements SensorEventListener {
+public class SensorService extends IntentService implements SensorEventListener {
 
     private SensorManager manager = null;
     private Sensor sensor = null;
     private long lastUpdate = 0;
     private float last_x = 6.0f, last_y = 6.0f, last_z = 6.0f;
-    ResultReceiver resultReceiver;
 
-    public int onStartCommand(Intent intent, int flags, int startId){
+    /**
+     * Creates an IntentService.  Invoked by your subclass's constructor.
+     *
+     * @param name Used to name the worker thread, important only for debugging.
+     */
+    public SensorService() {
+        super("SensorService");
+    }
+
+    /*public int onStartCommand(Intent intent, int flags, int startId){
         resultReceiver = intent.getParcelableExtra("receiver");
 
         manager = (SensorManager)getSystemService(SENSOR_SERVICE);
         sensor = manager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        boolean sensorAvailable = manager.registerListener(this,sensor,SensorManager.SENSOR_DELAY_FASTEST);
+        boolean sensorAvailable = manager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_FASTEST);
         if(sensorAvailable){
             System.out.println("Sensor available");
         }else{
@@ -36,7 +45,7 @@ public class SensorService extends Service implements SensorEventListener {
         }
 
         return START_STICKY;
-    }
+    }*/
 
     @Override
     public void onSensorChanged(SensorEvent event) {
@@ -55,9 +64,7 @@ public class SensorService extends Service implements SensorEventListener {
 
 
             if(Math.abs(x-last_x) > 8 || Math.abs(y-last_y) > 8 || Math.abs(z-last_z) > 8){
-                Bundle bundle  = new Bundle();
-                bundle.putString("state","Accident!!!");
-                resultReceiver.send(100,bundle);
+                System.out.println("Sensor collision!!!");
 
                 Intent intent = new Intent();
                 intent.setAction("com.example.Broadcast");
@@ -82,6 +89,19 @@ public class SensorService extends Service implements SensorEventListener {
     @Override
     public IBinder onBind(Intent intent) {
         return null;
+    }
+
+    @Override
+    protected void onHandleIntent(Intent intent) {
+
+        manager = (SensorManager)getSystemService(SENSOR_SERVICE);
+        sensor = manager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        boolean sensorAvailable = manager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_FASTEST);
+        if(sensorAvailable){
+            System.out.println("Sensor available");
+        }else{
+            System.out.println("Some problem when retrieving the sensor.");
+        }
     }
 
     public class SensorEventLoggerTask extends AsyncTask<SensorEvent, Void, Void> {

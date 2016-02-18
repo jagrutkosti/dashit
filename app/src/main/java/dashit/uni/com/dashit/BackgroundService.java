@@ -5,20 +5,29 @@
 package dashit.uni.com.dashit;
 
 import android.app.IntentService;
+import android.app.Notification;
+import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
+import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.text.format.DateFormat;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.TextureView;
+import android.view.WindowManager;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
@@ -41,40 +50,70 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.List;
 
-public class BackgroundService extends IntentService {
-
-    public BackgroundService(){
-        super("BackgroundService");
-    }
+public class BackgroundService extends Service implements SurfaceHolder.Callback{
 
     private static final String TAG = "RecorderService";
     private SurfaceView mSurfaceView;
     private SurfaceHolder mSurfaceHolder;
-    private static Camera mServiceCamera;
-    private boolean mRecordingStatus;
-    private MediaRecorder mMediaRecorder;
+    private boolean recordingStatus;
     static boolean accidentStatus = false;
     boolean manualStopStatus = false;
     int accidentOnVideoIndex = 0;
     Handler handler;
 
+    private WindowManager windowManager;
+    private SurfaceView surfaceView;
+    private Camera camera = null;
+    private MediaRecorder mediaRecorder = null;
+    SurfaceHolder globalHolder;
+    Thread thread = null;
+
+
     @Override
     public void onCreate() {
         super.onCreate();
         handler = new Handler();
-        for(int i = 1;i<4;i++){
-            File delPreviousFiles = new File("/sdcard/dashit"+i+".mp4");
+        for (int i = 1; i < 4; i++) {
+            File delPreviousFiles = new File("/sdcard/dashit" + i + ".mp4");
             delPreviousFiles.delete();
         }
+        mSurfaceView = MainActivity.mSurfaceView;
+        mSurfaceHolder = MainActivity.mSurfaceHolder;
+
+        // Start foreground service to avoid unexpected kill
+        Notification notification = new Notification.Builder(this)
+                .setContentTitle("Background Video Recorder")
+                .setContentText("")
+                .setSmallIcon(R.drawable.ic_launcher)
+                .build();
+        startForeground(1234, notification);
+
+        // Create new SurfaceView, set its size to 1x1, move it to the top left corner and set this service as a callback
+        windowManager = (WindowManager) this.getSystemService(Context.WINDOW_SERVICE);
+        surfaceView = new SurfaceView(this);
+        WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(
+                50, 50,
+                WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY,
+                WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
+                PixelFormat.TRANSLUCENT
+        );
+        layoutParams.gravity = Gravity.LEFT | Gravity.TOP;
+        windowManager.addView(surfaceView, layoutParams);
+        surfaceView.getHolder().addCallback(this);
     }
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
         manualStopStatus = true;
-        if(mRecordingStatus){
+        if(recordingStatus){
             stopRecording();
         }
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        windowManager.removeView(surfaceView);
     }
 
     @Nullable
@@ -83,116 +122,38 @@ public class BackgroundService extends IntentService {
         return null;
     }
 
-    @Override
-    protected void onHandleIntent(Intent intent) {
-        while(!accidentStatus){
-            int i =1;
-            while(i < 3) {
-                if (!accidentStatus && !manualStopStatus) {
-                    accidentOnVideoIndex = i;
-                    //mServiceCamera = CameraRecorder.mCamera;
-                    //mServiceCamera = Camera.open(1);
-                    mSurfaceView = MainActivity.mSurfaceView;
-                    mSurfaceHolder = MainActivity.mSurfaceHolder;
-                    startRecording("dashit" + i);
-                    try {
-                        Thread.sleep(5000);
-                        if(mRecordingStatus)
-                            stopRecording();
+    public void startRecording(String fileName){
+        recordingStatus = true;
+        camera = Camera.open();
+        mediaRecorder = new MediaRecorder();
+        camera.setDisplayOrientation(90);
+        camera.unlock();
+        /*if(mSurfaceHolder!=null && mSurfaceView!=null){
+            mediaRecorder.setPreviewDisplay(mSurfaceHolder.getSurface());
+        }else{
+            mediaRecorder.setPreviewDisplay(globalHolder.getSurface());
+        }*/
 
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    i++;
-                }else{
-                    break;
-                }
-            }
-        }
-        if(!manualStopStatus) {
-            mSurfaceView = MainActivity.mSurfaceView;
-            mSurfaceHolder = MainActivity.mSurfaceHolder;
-            startRecording("dashit3");
-            try {
-                Thread.sleep(5000);
-                stopRecording();
-                generateHash();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-    }
+        mediaRecorder.setPreviewDisplay(globalHolder.getSurface());
+        mediaRecorder.setCamera(camera);
+        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
+        mediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
+        mediaRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_480P));
 
-    public boolean startRecording(String fileName){
-        try {
-            //Toast.makeText(getBaseContext(), "Recording Started", Toast.LENGTH_SHORT).show();
-            mRecordingStatus = true;
-            mServiceCamera = Camera.open();
-            Camera.Parameters params = mServiceCamera.getParameters();
-            mServiceCamera.setParameters(params);
-            Camera.Parameters p = mServiceCamera.getParameters();
+        mediaRecorder.setOutputFile("/sdcard/" + fileName + ".mp4");
 
-            final List<Camera.Size> listSize = p.getSupportedPreviewSizes();
-            Camera.Size mPreviewSize = listSize.get(2);
-            Log.v(TAG, "use: width = " + mPreviewSize.width
-                    + " height = " + mPreviewSize.height);
-            p.setPreviewSize(mPreviewSize.width, mPreviewSize.height);
-            p.setPreviewFormat(PixelFormat.YCbCr_420_SP);
-            mServiceCamera.setParameters(p);
-            mServiceCamera.setDisplayOrientation(90);
-            try {
-                mServiceCamera.setPreviewDisplay(mSurfaceHolder);
-                mServiceCamera.startPreview();
-            }
-            catch (IOException e) {
-                Log.e(TAG, e.getMessage());
-                e.printStackTrace();
-            }
-
-            mServiceCamera.unlock();
-
-            mMediaRecorder = new MediaRecorder();
-            mMediaRecorder.setCamera(mServiceCamera);
-            mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
-            mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
-            mMediaRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_480P));
-            //mMediaRecorder.setMaxDuration(10000);
-            mMediaRecorder.setOutputFile("/sdcard/" + fileName + ".mp4");
-
-            mMediaRecorder.setPreviewDisplay(mSurfaceHolder.getSurface());
-
-            mMediaRecorder.prepare();
-            mMediaRecorder.start();
-
-            return true;
-        } catch (IllegalStateException e) {
-            Log.d(TAG, e.getMessage());
-            e.printStackTrace();
-            return false;
-        } catch (IOException e) {
-            Log.d(TAG, e.getMessage());
-            e.printStackTrace();
-            return false;
-        }
+        try { mediaRecorder.prepare(); } catch (Exception e) {}
+        mediaRecorder.start();
     }
 
     public void stopRecording() {
-        //Toast.makeText(getBaseContext(), "Recording Stopped", Toast.LENGTH_SHORT).show();
-        mRecordingStatus = false;
-        try {
-            mServiceCamera.reconnect();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        mMediaRecorder.stop();
-        mMediaRecorder.reset();
+        recordingStatus = false;
+        mediaRecorder.stop();
+        mediaRecorder.reset();
+        mediaRecorder.release();
 
-        mServiceCamera.stopPreview();
-        mMediaRecorder.release();
-
-        mServiceCamera.release();
-        mServiceCamera = null;
+        camera.lock();
+        camera.release();
     }
 
     public void generateHash(){
@@ -241,7 +202,7 @@ public class BackgroundService extends IntentService {
             }
         }
         byte[] finalByte = outputStream.toByteArray();
-        System.out.println("Final Byte Array Length::"+finalByte.length);
+        System.out.println("Final Byte Array Length::" + finalByte.length);
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             md.update(finalByte);
@@ -314,11 +275,63 @@ public class BackgroundService extends IntentService {
         }
     }
 
+    @Override
+    public void surfaceCreated(SurfaceHolder holder) {
+        globalHolder = holder;
+        thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(!accidentStatus){
+                    int i =1;
+                    while(i < 3) {
+                        if (!accidentStatus && !manualStopStatus) {
+                            accidentOnVideoIndex = i;
+                            startRecording("dashit" + i);
+                            try {
+                                Thread.sleep(5000);
+                                if(recordingStatus)
+                                    stopRecording();
+
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            i++;
+                        }else{
+                            break;
+                        }
+                    }
+                }
+                if(!manualStopStatus) {
+
+                    startRecording("dashit3");
+                    try {
+                        Thread.sleep(5000);
+                        stopRecording();
+                        generateHash();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        thread.start();
+    }
+
+    @Override
+    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+
+    }
+
+    @Override
+    public void surfaceDestroyed(SurfaceHolder holder) {
+
+    }
+
     public static class MyBroadcastReceiver extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            System.out.println("Accident!!");
+            System.out.println("Camera Collision!!");
             accidentStatus = true;
         }
     }

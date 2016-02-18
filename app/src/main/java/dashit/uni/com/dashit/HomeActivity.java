@@ -8,22 +8,23 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
-public class HomeActivity extends AppCompatActivity /*implements SurfaceHolder.Callback*/{
+public class HomeActivity extends AppCompatActivity {
 
     TextView txtView;
-    MyResultReceiver resultReceiver;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        //Camera
-        resultReceiver = new MyResultReceiver(null);
         txtView = (TextView)findViewById(R.id.accData);
 
         ImageButton btnStart = (ImageButton) findViewById(R.id.start);

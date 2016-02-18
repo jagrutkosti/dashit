@@ -4,6 +4,8 @@ package dashit.uni.com.dashit;
  * Created by Jagrut on 23-Jan-16.
  */
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.media.Image;
@@ -23,9 +25,8 @@ import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity implements SurfaceHolder.Callback{
 
-    TextView txtView;
-    MyResultReceiver resultReceiver;
-    ImageView imgView;
+    static TextView txtView;
+    static ImageView imgView;
 
     private static final String TAG = "Recorder";
     public static SurfaceView mSurfaceView;
@@ -37,7 +38,6 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        resultReceiver = new MyResultReceiver(null);
         txtView = (TextView)findViewById(R.id.accData);
         imgView = (ImageView)findViewById(R.id.likeacc);
 
@@ -48,7 +48,6 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
         Intent intent2 = new Intent(MainActivity.this, SensorService.class);
         intent2.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent2.putExtra("receiver", resultReceiver);
         startService(intent2);
 
         Intent intent = new Intent(MainActivity.this, BackgroundService.class);
@@ -72,7 +71,6 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-
     }
 
     @Override
@@ -80,41 +78,14 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
     }
 
-    class MyResultReceiver extends ResultReceiver{
-
-        /**
-         * Create a new ResultReceive to receive results.  Your
-         * {@link #onReceiveResult} method will be called from the thread running
-         * <var>handler</var> if given, or from an arbitrary thread if null.
-         *
-         * @param handler
-         */
-        public MyResultReceiver(Handler handler) {
-            super(handler);
-        }
+    public static class MyBroadcastReceiver extends BroadcastReceiver {
 
         @Override
-        protected void onReceiveResult(int resultCode, Bundle resultData){
-            if(resultCode == 100){
-                runOnUiThread(new UpdateUI(resultData.getString("state")));
-            }
-        }
-    }
-
-    class UpdateUI implements Runnable{
-        String updateString;
-
-        public UpdateUI(String updateString) {
-            this.updateString = updateString;
-        }
-        public void run() {
-            if(updateString.equalsIgnoreCase("Accident!!!")) {
-                txtView.setTextColor(Color.parseColor("red"));
-                imgView.setBackgroundResource(R.drawable.carcollision);
-            }
-            else
-                txtView.setTextColor(Color.parseColor("black"));
-            txtView.setText(updateString);
+        public void onReceive(Context context, Intent intent) {
+            System.out.println("Activity Collision!!");
+            txtView.setTextColor(Color.parseColor("red"));
+            imgView.setBackgroundResource(R.drawable.carcollision);
+            txtView.setText("Collision!!");
         }
     }
 }
