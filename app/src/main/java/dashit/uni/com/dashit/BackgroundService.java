@@ -10,6 +10,7 @@ import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
@@ -18,6 +19,7 @@ import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.text.format.DateFormat;
 import android.util.Log;
@@ -52,9 +54,6 @@ import java.util.List;
 
 public class BackgroundService extends Service implements SurfaceHolder.Callback{
 
-    private static final String TAG = "RecorderService";
-    private SurfaceView mSurfaceView;
-    private SurfaceHolder mSurfaceHolder;
     private boolean recordingStatus;
     static boolean accidentStatus = false;
     boolean manualStopStatus = false;
@@ -79,8 +78,8 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
 
         // Start foreground service to avoid unexpected kill
         Notification notification = new Notification.Builder(this)
-                .setContentTitle("Background Video Recorder")
-                .setContentText("")
+                .setContentTitle("DashIt")
+                .setContentText("The app is running.")
                 .setSmallIcon(R.drawable.ic_launcher)
                 .build();
         startForeground(1234, notification);
@@ -94,7 +93,7 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
                 WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
                 PixelFormat.TRANSLUCENT
         );
-        layoutParams.gravity = Gravity.TOP | Gravity.LEFT;
+        layoutParams.gravity = Gravity.TOP | Gravity.RIGHT;
         windowManager.addView(surfaceView, layoutParams);
         surfaceView.getHolder().addCallback(this);
     }
@@ -230,7 +229,7 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
             con.setRequestProperty("Content-Type", "application/json");
             con.setRequestProperty("Authorization", "Token token=\"a876e0bbb8894e8c8eadc5b3a19adff7\"");
             con.setRequestProperty("User-Agent","Mozilla/5.0 ( compatible ) ");
-            con.setRequestProperty("Accept","*/*");
+            con.setRequestProperty("Accept", "*/*");
             DataOutputStream dos = new DataOutputStream(con.getOutputStream());
             dos.writeBytes(postData);
             dos.flush();
@@ -246,6 +245,7 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
                 @Override
                 public void run() {
                     Toast.makeText(BackgroundService.this, "Hash sent successfully!", Toast.LENGTH_LONG).show();
+                    windowManager.removeView(surfaceView);
                 }
             });
         } catch (MalformedURLException e) {
@@ -323,7 +323,6 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            System.out.println("Camera Collision!!");
             accidentStatus = true;
         }
     }

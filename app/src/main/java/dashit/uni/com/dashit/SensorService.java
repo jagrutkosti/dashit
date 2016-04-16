@@ -41,12 +41,8 @@ public class SensorService extends IntentService implements SensorEventListener 
             long diffTime = (curTime - lastUpdate);
             lastUpdate = curTime;
 
-            float speed = Math.abs(x + y + z - last_x - last_y - last_z)/ diffTime * 10000;
-
-
+            //float speed = Math.abs(x + y + z - last_x - last_y - last_z)/ diffTime * 10000;
             if(Math.abs(x-last_x) > 8 || Math.abs(y-last_y) > 8 || Math.abs(z-last_z) > 8){
-                System.out.println("Sensor collision!!!");
-
                 Intent intent = new Intent();
                 intent.setAction("com.example.Broadcast");
                 intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
