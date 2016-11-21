@@ -4,32 +4,27 @@
 
 package dashit.uni.com.dashit;
 
-import android.app.IntentService;
+import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.Service;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
-import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.text.format.DateFormat;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.TextureView;
 import android.view.WindowManager;
-import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
@@ -51,6 +46,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class BackgroundService extends Service implements SurfaceHolder.Callback{
 
@@ -67,6 +64,8 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
     SurfaceHolder globalHolder;
     Thread thread = null;
 
+    int height = 0;
+    int width = 0;
     @Override
     public void onCreate() {
         super.onCreate();
@@ -84,16 +83,22 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
                 .build();
         startForeground(1234, notification);
 
-        // Create new SurfaceView, set its size to 1x1, move it to the top left corner and set this service as a callback
+        // Create new SurfaceView, set its size to 50x50, move it to the top left corner and set this service as a callback
         windowManager = (WindowManager) this.getSystemService(Context.WINDOW_SERVICE);
         surfaceView = new SurfaceView(this);
+
+        DisplayMetrics displaymetrics = new DisplayMetrics();
+        windowManager.getDefaultDisplay().getMetrics(displaymetrics);
+        height = displaymetrics.heightPixels;
+        width = displaymetrics.widthPixels;
+
         WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(
-                50, 50,
+                width,height - 500,
                 WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY,
                 WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
                 PixelFormat.TRANSLUCENT
         );
-        layoutParams.gravity = Gravity.TOP | Gravity.RIGHT;
+        //layoutParams.gravity = Gravity.TOP | Gravity.RIGHT;
         windowManager.addView(surfaceView, layoutParams);
         surfaceView.getHolder().addCallback(this);
     }
@@ -116,6 +121,13 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
     @Override
     public IBinder onBind(Intent intent) {
         return null;
+    }
+
+    public boolean isForeground(String myPackage) {
+        ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+        List<ActivityManager.RunningTaskInfo> runningTaskInfo = manager.getRunningTasks(1);
+        ComponentName componentInfo = runningTaskInfo.get(0).topActivity;
+        return componentInfo.getPackageName().equals(myPackage);
     }
 
     public void startRecording(String fileName){
@@ -171,7 +183,7 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
                 try {
                     fileInputStream = new FileInputStream(file);
                     fileInputStream.read(byteArray);
-                    System.out.println("File length::" + byteArray.length);
+                    Log.i("File length::", ""+byteArray.length);
                     outputStream.write(byteArray);
                     fileInputStream.close();
 
@@ -193,7 +205,7 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
             }
         }
         byte[] finalByte = outputStream.toByteArray();
-        System.out.println("Final Byte Array Length::" + finalByte.length);
+        Log.i("Final Byte Array Length", "" + finalByte.length);
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             md.update(finalByte);
@@ -202,7 +214,7 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
             for (int i=0;i<mdBytes.length;i++) {
                 hexString.append(Integer.toHexString(0xFF & mdBytes[i]));
             }
-            System.out.println("Hex format : " + hexString.toString());
+            Log.i("Hex format : ", "" + hexString.toString());
 
             //Create a hash.txt file
             File hash = new File(dir.getPath()+"/hash.txt");
@@ -320,7 +332,6 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
     }
 
     public static class MyBroadcastReceiver extends BroadcastReceiver {
-
         @Override
         public void onReceive(Context context, Intent intent) {
             accidentStatus = true;

@@ -1,4 +1,5 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
@@ -12,20 +13,21 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Journey : "
+        android:text="@string/status"
         android:id="@+id/textView"
         android:layout_alignParentTop="true"
         android:layout_alignParentStart="true"
-        android:textSize="25dp" />
+        android:textSize="25sp"
+        android:textColor="@android:color/background_dark" />
 
-    <fragment
+    <!--<fragment
         android:id="@+id/map"
-        android:name="com.google.android.gms.maps.MapFragment"
+        class="com.google.android.gms.maps.MapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/stop"
         android:layout_below="@+id/textView"
-        android:layout_marginTop="20dp" />
+        android:layout_marginTop="20dp" />-->
 
     <ImageButton
         android:layout_width="60dp"
@@ -33,29 +35,29 @@
         android:id="@+id/stop"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:background="@drawable/stop_button"
-        android:layout_marginTop="10dp" />
-
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/likeacc"
-        android:layout_above="@+id/map"
-        android:layout_alignEnd="@+id/map"
-        android:layout_alignParentTop="true"
-        android:layout_toEndOf="@+id/textView"
-        android:background="@drawable/thumb"
-        android:layout_marginRight="170dp"
-        android:layout_marginLeft="20dp" />
+        android:background="@drawable/red_dot"
+        android:layout_marginTop="10dp"
+        android:contentDescription="@string/stop" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="All is well!"
+        android:text="@string/safe"
         android:id="@+id/accData"
-        android:layout_alignBottom="@+id/likeacc"
-        android:layout_alignEnd="@+id/map"
-        android:textSize="25dp"
-        android:textColor="#50c1ff" />
+        android:textSize="25sp"
+        android:textColor="@android:color/background_dark"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/green_dot"
+        android:id="@+id/status"
+        android:contentDescription="@string/status"
+        android:layout_alignParentTop="true"
+        android:layout_toStartOf="@+id/stop"
+        android:layout_marginLeft="100dp"
+        android:layout_alignBottom="@+id/textView" />
 
 </RelativeLayout>

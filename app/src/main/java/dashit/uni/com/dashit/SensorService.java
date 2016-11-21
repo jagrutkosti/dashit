@@ -18,8 +18,6 @@ import android.support.annotation.Nullable;
  */
 public class SensorService extends IntentService implements SensorEventListener {
 
-    private SensorManager manager = null;
-    private Sensor sensor = null;
     private long lastUpdate = 0;
     private float last_x = 6.0f, last_y = 6.0f, last_z = 6.0f;
 
@@ -38,10 +36,8 @@ public class SensorService extends IntentService implements SensorEventListener 
         long curTime = System.currentTimeMillis();
 
         if ((curTime - lastUpdate) > 100) {
-            long diffTime = (curTime - lastUpdate);
             lastUpdate = curTime;
 
-            //float speed = Math.abs(x + y + z - last_x - last_y - last_z)/ diffTime * 10000;
             if(Math.abs(x-last_x) > 8 || Math.abs(y-last_y) > 8 || Math.abs(z-last_z) > 8){
                 Intent intent = new Intent();
                 intent.setAction("com.example.Broadcast");
@@ -70,26 +66,16 @@ public class SensorService extends IntentService implements SensorEventListener 
 
     @Override
     protected void onHandleIntent(Intent intent) {
-
+        SensorManager manager = null;
+        Sensor sensor = null;
         manager = (SensorManager)getSystemService(SENSOR_SERVICE);
         sensor = manager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        boolean sensorAvailable = manager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_FASTEST);
-        if(sensorAvailable){
-            System.out.println("Sensor available");
-        }else{
-            System.out.println("Some problem when retrieving the sensor.");
-        }
+        manager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_FASTEST);
     }
 
     public class SensorEventLoggerTask extends AsyncTask<SensorEvent, Void, Void> {
         @Override
         public Void doInBackground(SensorEvent... events) {
-            for(int i=0;i<events.length;i++){
-                SensorEvent event = events[i];
-                for(int j=0;j<event.values.length;j++){
-                    //System.out.println("Sensor Data::"+event.values[i]);
-                }
-            }
             return null;
         }
     }

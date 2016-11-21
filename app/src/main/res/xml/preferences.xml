@@ -1,16 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <CheckBoxPreference
+        android:title="Send SMS"
+        android:key="sendSms" />
     <EditTextPreference
         android:title="Your Name"
-        android:key="myName" />
+        android:key="myName"
+        android:maxLength="25"
+        android:summary="Please enter your name"/>
     <EditTextPreference
         android:title="Your Phone Number"
         android:key="myPhoneNumber"
         android:inputType="phone"
-        android:summary="Please provide your phone number" />
+        android:maxLength="15"
+        android:summary="Please enter your phone number with country code" />
     <EditTextPreference
         android:title="Emergency Contact"
         android:key="contact"
         android:inputType="phone"
-        android:summary="Please provide your emergency contact's phone number" />
+        android:maxLength="15"
+        android:summary="Please enter your emergency contact with country code" />
 </PreferenceScreen>

@@ -10,10 +10,7 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.location.Criteria;
 import android.location.Location;
-import android.location.LocationManager;
-import android.media.Image;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
@@ -26,16 +23,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -65,7 +59,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         setContentView(R.layout.activity_main);
 
         txtView = (TextView)findViewById(R.id.accData);
-        imgView = (ImageView)findViewById(R.id.likeacc);
+        imgView = (ImageView)findViewById(R.id.status);
 
         Intent intent2 = new Intent(MainActivity.this, SensorService.class);
         intent2.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -99,7 +93,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 .setFastestInterval(1 * 1000); // 1 second, in milliseconds
     }
 
-    private void initializeMap() {
+    /*private void initializeMap() {
         if (googleMap == null) {
             googleMap = ((MapFragment) getFragmentManager().findFragmentById(
                     R.id.map)).getMap();
@@ -122,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
             googleMap.addMarker(new MarkerOptions().position(new LatLng(currentLatitude, currentLongitude)));
         }
-    }
+    }*/
 
     @Override
     public void onBackPressed() { }
@@ -159,7 +153,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             currentLongitude = location.getLongitude();
             latToSend = currentLatitude;
             longToSend = currentLongitude;
-            initializeMap();
+            //initializeMap();
         }
     }
 
@@ -199,14 +193,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
     }
 
+    static int smsCount = 0;
     public static class MyBroadcastReceiver extends BroadcastReceiver {
-        int smsCount = 0;
+
 
         @Override
         public void onReceive(Context context, Intent intent) {
             txtView.setTextColor(Color.parseColor("red"));
-            imgView.setBackgroundResource(R.drawable.carcollision);
-            txtView.setText("Collision!!");
+            imgView.setImageResource(R.drawable.carcollision);
+            txtView.setText(R.string.collision);
             if(smsCount == 0){
                 sendMessage();
                 smsCount++;
@@ -216,28 +211,29 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         public void sendMessage(){
             //Get data from preferences
             SharedPreferences SP = PreferenceManager.getDefaultSharedPreferences(MyApplication.getAppContext());
-            String myName = SP.getString("myName", "NA");
-            String myPhoneNumber = SP.getString("myPhoneNumber","NA");
-            String emergencyContact = SP.getString("contact","NA");
-            String location = "http://maps.google.com/?q=";
-            location += latToSend+","+longToSend;
-            String message = "Your contact: " + myName +"\n needs urgent help!" +
-                    "\n Phone number: " + myPhoneNumber +"," +
-                    "\n Current location: " + location;
+            if(SP.getBoolean("sendSms", false)) {
+                String myName = SP.getString("myName", "NA");
+                String myPhoneNumber = SP.getString("myPhoneNumber", "NA");
+                String emergencyContact = SP.getString("contact", "NA");
+                String location = "http://maps.google.com/?q=";
+                location += latToSend + "," + longToSend;
+                String message = "Your contact: " + myName + "\n needs urgent help!" +
+                        "\n Phone number: " + myPhoneNumber + "," +
+                        "\n Current location: " + location;
 
-            System.out.println(message);
-            //Send SMS
-            if(emergencyContact.length()>2 && !emergencyContact.equalsIgnoreCase("NA")){
-                try {
-                    SmsManager smsManager = SmsManager.getDefault();
-                    smsManager.sendTextMessage(emergencyContact, null, message, null, null);
-                    Toast.makeText(MyApplication.getAppContext(), "SMS Sent!",
-                            Toast.LENGTH_LONG).show();
-                }catch (Exception e){
-                    e.printStackTrace();
+                System.out.println(message);
+                //Send SMS
+                if (emergencyContact.length() > 2 && !emergencyContact.equalsIgnoreCase("NA")) {
+                    try {
+                        SmsManager smsManager = SmsManager.getDefault();
+                        smsManager.sendTextMessage(emergencyContact, null, message, null, null);
+                        Toast.makeText(MyApplication.getAppContext(), "SMS Sent!",
+                                Toast.LENGTH_LONG).show();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
-
         }
     }
 }
