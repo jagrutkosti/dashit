@@ -27,7 +27,7 @@
         android:clickable="true"
         android:nestedScrollingEnabled="false"
         android:elevation="0dp"
-        android:backgroundTint="@android:color/holo_orange_dark"
+        android:backgroundTint="@android:color/holo_orange_light"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="141dp" />

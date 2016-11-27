@@ -4,7 +4,9 @@
 
 package dashit.uni.com.dashit;
 
+import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.Application;
 import android.app.Notification;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -15,6 +17,8 @@ import android.graphics.PixelFormat;
 import android.hardware.Camera;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
+import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
@@ -66,13 +70,20 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
 
     int height = 0;
     int width = 0;
+
     @Override
     public void onCreate() {
         super.onCreate();
         handler = new Handler();
-        for (int i = 1; i < 4; i++) {
-            File delPreviousFiles = new File("/sdcard/dashit" + i + ".mp4");
-            delPreviousFiles.delete();
+
+        if(isExternalStorageWritable()){
+            for (int i = 1; i < 4; i++) {
+                File delPreviousFiles = new File(Environment.getExternalStorageDirectory().toString()+"/dashit" + i + ".mp4");
+                delPreviousFiles.delete();
+            }
+        }else{
+            Toast.makeText(BackgroundService.this, "Storage device not available.", Toast.LENGTH_LONG).show();
+            onDestroy();
         }
 
         // Start foreground service to avoid unexpected kill
@@ -101,7 +112,38 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
         //layoutParams.gravity = Gravity.TOP | Gravity.RIGHT;
         windowManager.addView(surfaceView, layoutParams);
         surfaceView.getHolder().addCallback(this);
+
+        mStatusChecker.run();
     }
+
+    Runnable mStatusChecker = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                if(MyLifeCycleHandler.isApplicationVisible() || MyLifeCycleHandler.isApplicationInForeground()){
+                    WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(
+                            width,height - 500,
+                            WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY,
+                            WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
+                            PixelFormat.TRANSLUCENT
+                    );
+                    windowManager.updateViewLayout(surfaceView, layoutParams);
+                }else{
+                    WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(
+                            50,50,
+                            WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY,
+                            WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
+                            PixelFormat.TRANSLUCENT
+                    );
+                    layoutParams.gravity = Gravity.TOP | Gravity.RIGHT;
+                    windowManager.updateViewLayout(surfaceView, layoutParams);
+                }
+            } finally {
+
+                handler.postDelayed(mStatusChecker, 1000);
+            }
+        }
+    };
 
     @Override
     public void onDestroy() {
@@ -115,6 +157,7 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
             e.printStackTrace();
         }
         windowManager.removeView(surfaceView);
+        handler.removeCallbacks(mStatusChecker);
     }
 
     @Nullable
@@ -123,12 +166,10 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
         return null;
     }
 
-    public boolean isForeground(String myPackage) {
-        ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
-        List<ActivityManager.RunningTaskInfo> runningTaskInfo = manager.getRunningTasks(1);
-        ComponentName componentInfo = runningTaskInfo.get(0).topActivity;
-        return componentInfo.getPackageName().equals(myPackage);
+    public boolean isExternalStorageWritable() {
+        return Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState());
     }
+
 
     public void startRecording(String fileName){
         recordingStatus = true;
@@ -143,7 +184,7 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
         mediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
         mediaRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_480P));
 
-        mediaRecorder.setOutputFile("/sdcard/" + fileName + ".mp4");
+        mediaRecorder.setOutputFile(Environment.getExternalStorageDirectory().toString() + "/" + fileName + ".mp4");
 
         try { mediaRecorder.prepare(); } catch (Exception e) {}
         mediaRecorder.start();
@@ -171,12 +212,12 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
         }
         orderOfVideo[2] = 3;
 
-        File dir = new File("/sdcard/dashitHistory/"+ DateFormat.format("dd-MM-yyyy HH:mm", new Date().getTime()));
+        File dir = new File(Environment.getExternalStorageDirectory().toString()+"/dashitHistory/"+ DateFormat.format("dd-MM-yyyy HH:mm", new Date().getTime()));
         if(!dir.isDirectory())
             dir.mkdirs();
         File saveFile;
         for(int i=0;i<3;i++){
-            File file = new File("/sdcard/dashit"+orderOfVideo[i]+".mp4");
+            File file = new File(Environment.getExternalStorageDirectory().toString()+"/dashit"+orderOfVideo[i]+".mp4");
             if(file.exists() && !file.isDirectory()){
                 byte[] byteArray = new byte[(int)file.length()];
                 InputStream fileInputStream;
@@ -311,7 +352,9 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
                     try {
                         Thread.sleep(10000);
                         stopRecording();
+                        handler.removeCallbacks(mStatusChecker);
                         generateHash();
+                        System.exit(0);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -330,6 +373,7 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
     public void surfaceDestroyed(SurfaceHolder holder) {
 
     }
+
 
     public static class MyBroadcastReceiver extends BroadcastReceiver {
         @Override
