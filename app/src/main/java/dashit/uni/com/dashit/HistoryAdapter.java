@@ -88,6 +88,7 @@ public class HistoryAdapter extends BaseAdapter {
                 }
                 if(!directory.isCheckedAtServer()) {
                     directory.setCheckedAtServer(true);
+                    directory.setSavedHash(hash.toString());
                     new HashStatusCheck(this).execute(hash.toString(), directory.getDirectory());
                 }
             }
@@ -123,8 +124,6 @@ public class HistoryAdapter extends BaseAdapter {
                     buffer.append(line);
                 }
                 reader.close();
-                System.out.println("Response:::"+buffer.toString());
-
             } catch (IOException e) {
                 e.printStackTrace();
 

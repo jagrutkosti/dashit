@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_verify_files"
     android:layout_width="match_parent"
@@ -8,16 +9,211 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="dashit.uni.com.dashit.VerifyFiles">
+    tools:context="dashit.uni.com.dashit.VerifyFilesActivity">
+
+    <TextView
+        android:id="@+id/fileName1"
+        android:text="TextView"
+        android:layout_below="@+id/directoryVerify"
+        android:layout_alignParentStart="true"
+        android:background="@drawable/ic_movie_black_48dp"
+        android:paddingTop="25dp"
+        android:textColor="@android:color/background_light"
+        android:paddingLeft="7dp"
+        android:paddingRight="5dp"
+        android:paddingBottom="5dp"
+        android:layout_width="70dp"
+        android:layout_height="80dp" />
+
+    <TextView
+        android:text="TextView"
+        android:layout_width="70dp"
+        android:layout_height="80dp"
+        android:id="@+id/fileName2"
+        android:layout_below="@+id/directoryVerify"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/ic_movie_black_48dp"
+        android:textColor="@android:color/background_light"
+        android:paddingTop="25dp"
+        android:paddingLeft="7dp"
+        android:paddingBottom="5dp"
+        android:paddingRight="5dp" />
+
+    <TextView
+        android:text="TextView"
+        android:layout_width="70dp"
+        android:layout_height="80dp"
+        android:id="@+id/fileName3"
+        android:layout_below="@+id/directoryVerify"
+        android:layout_alignParentEnd="true"
+        android:background="@drawable/ic_movie_black_48dp"
+        android:paddingTop="25dp"
+        android:textColor="@android:color/background_light"
+        android:paddingLeft="7dp"
+        android:paddingBottom="5dp"
+        android:paddingRight="5dp" />
 
     <TextView
         android:text="TextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/directoryVerify"
-        android:layout_centerVertical="true"
-        android:layout_alignParentStart="true"
+        android:textSize="18sp"
+        android:textStyle="normal|bold"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+
+    <ImageView
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:id="@+id/plus1"
+        android:layout_alignTop="@+id/fileName1"
+        android:layout_toEndOf="@+id/fileName1"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/ic_forward_black_48dp"
+        android:backgroundTint="@android:color/holo_orange_light" />
+
+    <ImageView
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:id="@+id/plus2"
+        android:background="@drawable/ic_forward_black_48dp"
+        android:layout_alignTop="@+id/plus1"
+        android:layout_toEndOf="@+id/directoryVerify"
+        android:backgroundTint="@android:color/holo_orange_light" />
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:id="@+id/relativeLayout"
+        android:layout_below="@+id/fileName1"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/back"
+        android:layout_height="50dp"
+        android:paddingTop="5dp">
+        <ImageView
+            android:layout_alignParentStart="true"
+            android:id="@+id/hashIcon"
+            android:backgroundTint="@android:color/holo_orange_light"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/hashtag" />
+
+        <TextView
+            android:text="TextView"
+            android:layout_width="wrap_content"
+            android:id="@+id/hashValue"
+            android:layout_height="40dp"
+            android:layout_alignParentEnd="true"
+            android:layout_toEndOf="@+id/hashIcon"
+            android:gravity="center_vertical"
+            android:paddingLeft="10dp" />
+
+    </RelativeLayout>
+
+    <ImageView
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:id="@+id/arrowDown"
+        android:background="@drawable/ic_forward_black_48dp"
+        android:layout_below="@+id/relativeLayout"
+        android:layout_centerHorizontal="true"
+        android:rotation="90"
+        android:backgroundTint="@android:color/holo_orange_light"
+        android:visibility="invisible" />
+
+    <ImageView
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:id="@+id/bitcoin"
+        android:background="@drawable/bitcoin"
+        android:backgroundTint="@android:color/background_dark"
+        android:layout_below="@+id/arrowDown"
+        android:layout_alignStart="@+id/arrowDown"
+        android:visibility="invisible" />
+
+    <TextView
+        android:text="TextView"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:id="@+id/hashSubmission"
+        android:visibility="invisible"
+        android:layout_below="@+id/bitcoin"
         android:layout_alignParentEnd="true"
-        android:textSize="24sp"
-        android:textStyle="normal|bold" />
+        android:gravity="center" />
+
+    <ImageView
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_below="@+id/hashSubmission"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="26dp"
+        android:id="@+id/txArrow"
+        android:background="@drawable/ic_forward_black_48dp"
+        android:backgroundTint="@android:color/holo_orange_light"
+        android:rotation="90"
+        android:visibility="invisible" />
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:id="@+id/relativeLayoutForTx"
+        android:background="@drawable/back"
+        android:layout_height="50dp"
+        android:paddingTop="5dp"
+        android:layout_below="@+id/txArrow"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="44dp"
+        android:visibility="invisible">
+        <ImageView
+            android:layout_alignParentStart="true"
+            android:id="@+id/txHashIcon"
+            android:backgroundTint="@android:color/holo_orange_light"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/hashtag"
+            android:visibility="visible" />
+
+        <TextView
+            android:text="TextView"
+            android:layout_width="wrap_content"
+            android:id="@+id/txHashText"
+            android:layout_height="40dp"
+            android:gravity="center_vertical"
+            android:paddingLeft="10dp"
+            android:visibility="visible"
+            android:layout_toRightOf="@+id/txHashIcon"
+            android:layout_toLeftOf="@+id/button"/>
+
+        <Button
+            android:id="@+id/button"
+            android:layout_alignBaseline="@+id/txHashText"
+            android:layout_alignBottom="@+id/txHashText"
+            android:layout_alignParentEnd="true"
+            android:background="@drawable/ic_content_copy_black_48dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="22dp" />
+
+    </RelativeLayout>
+
+    <TextView
+        android:text="@string/transactionHash"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/txHashHeading"
+        android:layout_marginTop="15dp"
+        android:textSize="16sp"
+        android:visibility="invisible"
+        android:layout_below="@+id/txArrow"
+        android:layout_centerHorizontal="true" />
+
+    <android.support.v7.widget.AppCompatButton
+        android:text="Verify"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/verifyButton"
+        android:backgroundTint="@android:color/holo_orange_light"
+        android:visibility="invisible" />
+
 </RelativeLayout>

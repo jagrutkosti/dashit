@@ -12,4 +12,8 @@
     <string name="stop">Stop</string>
     <string name="collision">Collision!</string>
     <string name="title_activity_verify_files">Verify Files</string>
+    <string name="hashNotCorrect">Computed hash does not match the saved hash</string>
+    <string name="hashSubmission">Hash submitted to Bitcoin Blockchain</string>
+    <string name="hashNoSubmission">Hash has NOT been submitted to Bitcoin Blockchain</string>
+    <string name="transactionHash">Transaction Hash</string>
 </resources>

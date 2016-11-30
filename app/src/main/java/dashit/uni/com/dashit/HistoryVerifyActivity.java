@@ -37,6 +37,13 @@ public class HistoryVerifyActivity extends AppCompatActivity {
                 HistoryFiles file = itemList.get(position);
                 Intent verifyActivity = new Intent(getApplicationContext(), VerifyFilesActivity.class);
                 verifyActivity.putExtra("directory", file.getDirectory());
+                for(int i = 0; i < file.getFilesInDirectory().size(); i++){
+                    if(file.getFilesInDirectory().get(i).endsWith(".mp4"))
+                        verifyActivity.putExtra("file"+i, file.getFilesInDirectory().get(i));
+                }
+                verifyActivity.putExtra("tx_hash", file.getTxHash());
+                verifyActivity.putExtra("seed", file.getSeed());
+                verifyActivity.putExtra("savedHash", file.getSavedHash());
                 startActivity(verifyActivity);
             }
         });
@@ -57,7 +64,9 @@ public class HistoryVerifyActivity extends AppCompatActivity {
                 files.setDirectory(dir.getPath().substring(dir.getPath().lastIndexOf("/") + 1));
                 List<String> fileNames = new ArrayList<>();
                 if(dir.isDirectory()){
-                    for(File f : dir.listFiles()){
+                    File[] filesInDir = dir.listFiles();
+                    Arrays.sort(filesInDir);
+                    for(File f : filesInDir){
                         fileNames.add(f.getAbsolutePath());
                     }
                 }

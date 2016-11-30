@@ -15,6 +15,16 @@ public class HistoryFiles {
     private String privateKey;
     private String publicKey;
     private String seed;
+    private String savedHash;
+
+    public String getSavedHash() {
+        return savedHash;
+    }
+
+    public void setSavedHash(String savedHash) {
+        this.savedHash = savedHash;
+    }
+
     private boolean checkedAtServer;
 
     public boolean isCheckedAtServer() {
