@@ -52,9 +52,9 @@ public class ExpandableListViewAdapter extends BaseExpandableListAdapter {
 
         if (resultView == null) {
 
-            resultView = inflater.inflate(R.layout.list_item, null); //TODO change layout id
+            resultView = inflater.inflate(R.layout.list_item, null);
             holder = new ViewHolder();
-            holder.textLabel = (TextView) resultView.findViewById(R.id.lblListItem); //TODO change view id
+            holder.textLabel = (TextView) resultView.findViewById(R.id.lblListItem);
             resultView.setTag(holder);
         } else {
             holder = (ViewHolder) resultView.getTag();
@@ -88,9 +88,9 @@ public class ExpandableListViewAdapter extends BaseExpandableListAdapter {
         ViewHolder holder;
 
         if (resultView == null) {
-            resultView = inflater.inflate(R.layout.list_group, null); //TODO change layout id
+            resultView = inflater.inflate(R.layout.list_group, null);
             holder = new ViewHolder();
-            holder.textLabel = (TextView) resultView.findViewById(R.id.lblListHeader); //TODO change view id
+            holder.textLabel = (TextView) resultView.findViewById(R.id.lblListHeader);
             resultView.setTag(holder);
         } else {
             holder = (ViewHolder) resultView.getTag();

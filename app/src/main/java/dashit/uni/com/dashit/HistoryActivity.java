@@ -1,6 +1,5 @@
 package dashit.uni.com.dashit;
 
-import android.app.ActionBar;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
@@ -17,7 +16,6 @@ import java.util.List;
  * Created by Jagrut on 17-Feb-16.
  */
 public class HistoryActivity extends AppCompatActivity {
-    //ActionBar actionBar = getActionBar();
     ExpandableListViewAdapter adapter;
     ExpandableListView expListView;
 

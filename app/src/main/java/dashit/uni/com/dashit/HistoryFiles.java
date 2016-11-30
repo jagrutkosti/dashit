@@ -9,6 +9,69 @@ import java.util.List;
 public class HistoryFiles {
     private List<String> filesInDirectory;
     private String directory;
+    private String txHash;
+    private String recipient;
+    private String submissionTime;
+    private String privateKey;
+    private String publicKey;
+    private String seed;
+    private boolean checkedAtServer;
+
+    public boolean isCheckedAtServer() {
+        return checkedAtServer;
+    }
+
+    public void setCheckedAtServer(boolean checkedAtServer) {
+        this.checkedAtServer = checkedAtServer;
+    }
+
+    public String getTxHash() {
+        return txHash;
+    }
+
+    public void setTxHash(String txHash) {
+        this.txHash = txHash;
+    }
+
+    public String getRecipient() {
+        return recipient;
+    }
+
+    public void setRecipient(String recipient) {
+        this.recipient = recipient;
+    }
+
+    public String getSubmissionTime() {
+        return submissionTime;
+    }
+
+    public void setSubmissionTime(String submissionTime) {
+        this.submissionTime = submissionTime;
+    }
+
+    public String getPrivateKey() {
+        return privateKey;
+    }
+
+    public void setPrivateKey(String privateKey) {
+        this.privateKey = privateKey;
+    }
+
+    public String getPublicKey() {
+        return publicKey;
+    }
+
+    public void setPublicKey(String publicKey) {
+        this.publicKey = publicKey;
+    }
+
+    public String getSeed() {
+        return seed;
+    }
+
+    public void setSeed(String seed) {
+        this.seed = seed;
+    }
 
     public String getDirectory() {
         return directory;

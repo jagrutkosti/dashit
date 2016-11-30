@@ -1,7 +1,10 @@
 package dashit.uni.com.dashit;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Handler;
 import android.os.ResultReceiver;
 import android.support.v7.app.AppCompatActivity;
@@ -45,6 +48,10 @@ public class HomeActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        boolean networkStatus = isOnline();
+        if(!networkStatus)
+            Toast.makeText(this, "Please connect to Internet.", Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -63,7 +70,7 @@ public class HomeActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_history) {
-            Intent intent = new Intent(getApplicationContext(), HistoryActivity.class);
+            Intent intent = new Intent(getApplicationContext(), HistoryVerifyActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
             return true;
@@ -77,6 +84,12 @@ public class HomeActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public boolean isOnline() {
+        ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        return (networkInfo != null && networkInfo.isConnected());
     }
 
     class MyResultReceiver extends ResultReceiver{

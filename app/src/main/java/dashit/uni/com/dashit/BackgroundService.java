@@ -4,20 +4,15 @@
 
 package dashit.uni.com.dashit;
 
-import android.app.Activity;
-import android.app.ActivityManager;
-import android.app.Application;
 import android.app.Notification;
 import android.app.Service;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.hardware.Camera;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
-import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
@@ -36,22 +31,17 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class BackgroundService extends Service implements SurfaceHolder.Callback{
 
@@ -60,6 +50,7 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
     boolean manualStopStatus = false;
     int accidentOnVideoIndex = 0;
     Handler handler;
+    Handler screenSizeHandler;
 
     private WindowManager windowManager;
     private SurfaceView surfaceView;
@@ -75,6 +66,7 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
     public void onCreate() {
         super.onCreate();
         handler = new Handler();
+        screenSizeHandler = new Handler();
 
         if(isExternalStorageWritable()){
             for (int i = 1; i < 4; i++) {
@@ -109,7 +101,6 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
                 WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
                 PixelFormat.TRANSLUCENT
         );
-        //layoutParams.gravity = Gravity.TOP | Gravity.RIGHT;
         windowManager.addView(surfaceView, layoutParams);
         surfaceView.getHolder().addCallback(this);
 
@@ -140,7 +131,7 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
                 }
             } finally {
 
-                handler.postDelayed(mStatusChecker, 1000);
+                screenSizeHandler.postDelayed(mStatusChecker, 500);
             }
         }
     };
@@ -157,7 +148,7 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
             e.printStackTrace();
         }
         windowManager.removeView(surfaceView);
-        handler.removeCallbacks(mStatusChecker);
+        screenSizeHandler.removeCallbacks(mStatusChecker);
     }
 
     @Nullable
@@ -182,7 +173,7 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
         mediaRecorder.setCamera(camera);
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
         mediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
-        mediaRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_480P));
+        mediaRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH));
 
         mediaRecorder.setOutputFile(Environment.getExternalStorageDirectory().toString() + "/" + fileName + ".mp4");
 
@@ -200,7 +191,7 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
         camera.release();
     }
 
-    public void generateHash(){
+    public void generateHash() {
         int[] orderOfVideo = new int[3];
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         if(accidentOnVideoIndex == 2){
@@ -215,31 +206,20 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
         File dir = new File(Environment.getExternalStorageDirectory().toString()+"/dashitHistory/"+ DateFormat.format("dd-MM-yyyy HH:mm", new Date().getTime()));
         if(!dir.isDirectory())
             dir.mkdirs();
-        File saveFile;
+
         for(int i=0;i<3;i++){
             File file = new File(Environment.getExternalStorageDirectory().toString()+"/dashit"+orderOfVideo[i]+".mp4");
-            if(file.exists() && !file.isDirectory()){
-                byte[] byteArray = new byte[(int)file.length()];
-                InputStream fileInputStream;
+            if(file.exists() && !file.isDirectory()) {
+                byte[] byteArray = new byte[(int) file.length()];
                 try {
-                    fileInputStream = new FileInputStream(file);
-                    fileInputStream.read(byteArray);
-                    Log.i("File length::", ""+byteArray.length);
-                    outputStream.write(byteArray);
-                    fileInputStream.close();
+                    FileOutputStream target = new FileOutputStream(dir.getPath() + "/" + (i + 1) + "accVideo" + orderOfVideo[i] + ".mp4");
+                    InputStream fileIS = new FileInputStream(file);
+                    fileIS.read(byteArray);
 
-                    fileInputStream = new FileInputStream(file);
-                    saveFile = new File(dir.getPath()+"/"+(i+1)+"accVideo"+orderOfVideo[i]+".mp4");
-                    OutputStream out = new FileOutputStream(saveFile);
-                    byte[] buf = new byte[1024];
-                    int len;
-                    while ((len = fileInputStream.read(buf)) > 0) {
-                        out.write(buf, 0, len);
-                    }
-                    fileInputStream.close();
-                    out.close();
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
+                    target.write(byteArray);
+                    outputStream.write(byteArray);
+                    fileIS.close();
+                    target.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -263,7 +243,7 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
             writer.append(hexString.toString());
             writer.flush();
             writer.close();
-
+            outputStream.close();
             sendHashToServer(hexString.toString());
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
@@ -297,8 +277,7 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
             handler.post(new Runnable() {
                 @Override
                 public void run() {
-                    Toast.makeText(BackgroundService.this, "Hash sent successfully!", Toast.LENGTH_LONG).show();
-                    windowManager.removeView(surfaceView);
+                    Toast.makeText(MyApplication.getAppContext(), "Hash sent successfully!", Toast.LENGTH_LONG).show();
                 }
             });
         } catch (MalformedURLException e) {
@@ -352,9 +331,9 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
                     try {
                         Thread.sleep(10000);
                         stopRecording();
-                        handler.removeCallbacks(mStatusChecker);
+                        screenSizeHandler.removeCallbacks(mStatusChecker);
                         generateHash();
-                        System.exit(0);
+                        windowManager.removeView(surfaceView);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }

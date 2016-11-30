@@ -1,0 +1,72 @@
+package dashit.uni.com.dashit;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.os.Environment;
+import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ListView;
+
+import java.io.File;
+import java.io.FileFilter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+/**
+ * Created by Jagrut on 29-Nov-16.
+ */
+
+public class HistoryVerifyActivity extends AppCompatActivity {
+    private ListView mListView;
+    private ArrayList<HistoryFiles> itemList = new ArrayList<>();
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState){
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_history_verify);
+
+        mListView = (ListView) findViewById(R.id.dates);
+        populateView();
+
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                HistoryFiles file = itemList.get(position);
+                Intent verifyActivity = new Intent(getApplicationContext(), VerifyFilesActivity.class);
+                verifyActivity.putExtra("directory", file.getDirectory());
+                startActivity(verifyActivity);
+            }
+        });
+    }
+
+    public void populateView(){
+        File rootDirectory = new File(Environment.getExternalStorageDirectory().toString()+"/dashitHistory/");
+        if(rootDirectory.exists()){
+            File[] directories = new File(rootDirectory.getPath()).listFiles(new FileFilter() {
+                @Override
+                public boolean accept(File pathname) {
+                    return pathname.isDirectory();
+                }
+            });
+
+            for (File dir : directories) {
+                HistoryFiles files = new HistoryFiles();
+                files.setDirectory(dir.getPath().substring(dir.getPath().lastIndexOf("/") + 1));
+                List<String> fileNames = new ArrayList<>();
+                if(dir.isDirectory()){
+                    for(File f : dir.listFiles()){
+                        fileNames.add(f.getAbsolutePath());
+                    }
+                }
+                files.setFilesInDirectory(fileNames);
+                itemList.add(files);
+            }
+            HistoryAdapter adapter = new HistoryAdapter(this, itemList);
+            mListView.setAdapter(adapter);
+        }
+
+    }
+}
