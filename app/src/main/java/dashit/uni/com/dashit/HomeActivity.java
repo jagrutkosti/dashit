@@ -88,41 +88,4 @@ public class HomeActivity extends AppCompatActivity {
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
         return (networkInfo != null && networkInfo.isConnected());
     }
-
-    class MyResultReceiver extends ResultReceiver{
-
-        /**
-         * Create a new ResultReceive to receive results.  Your
-         * {@link #onReceiveResult} method will be called from the thread running
-         * <var>handler</var> if given, or from an arbitrary thread if null.
-         *
-         * @param handler
-         */
-        public MyResultReceiver(Handler handler) {
-            super(handler);
-        }
-
-        @Override
-        protected void onReceiveResult(int resultCode, Bundle resultData){
-            if(resultCode == 100){
-                runOnUiThread(new UpdateUI(resultData.getString("state")));
-            }
-        }
-    }
-
-    class UpdateUI implements Runnable{
-        String updateString;
-
-        public UpdateUI(String updateString) {
-            this.updateString = updateString;
-        }
-        public void run() {
-            if(updateString.equalsIgnoreCase("Accident!!!"))
-                txtView.setTextColor(Color.parseColor("red"));
-            else
-                txtView.setTextColor(Color.parseColor("black"));
-            txtView.setText(updateString);
-        }
-    }
-
 }
