@@ -43,6 +43,10 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 
+/**
+ * The main application logic. All background tasks are synchronized here.
+ * That includes, Video Recording, File Saving, Hash Creation, Hash Transmission
+ */
 public class BackgroundService extends Service implements SurfaceHolder.Callback{
 
     private boolean recordingStatus;
@@ -62,6 +66,10 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
     int height = 0;
     int width = 0;
 
+    /**
+     * Create a surface to hold the camera preview. This surface rests above all surface.
+     * Create Notification to let the user know anytime that the application is running.
+     */
     @Override
     public void onCreate() {
         super.onCreate();
@@ -107,6 +115,11 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
         mStatusChecker.run();
     }
 
+    /**
+     * A thread which checks if any activity is in foreground or not.
+     * Depending on that it updates the surface to tiny tile on right side of screen or big tile
+     * in center.
+     */
     Runnable mStatusChecker = new Runnable() {
         @Override
         public void run() {
@@ -136,6 +149,59 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
         }
     };
 
+    /**
+     * When the surface is created, it will start recording the video in infinite loop.
+     * The variable 'accidentStatus' changes in MyBroadcastReceiver when a collision is detected
+     * to notify when to stop video recording
+     * @param holder The Surface holder on which to attach the camera preview
+     */
+    @Override
+    public void surfaceCreated(SurfaceHolder holder) {
+        globalHolder = holder;
+        thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(!accidentStatus){
+                    int i =1;
+                    while(i < 3) {
+                        if (!accidentStatus && !manualStopStatus) {
+                            accidentOnVideoIndex = i;
+                            startRecording("dashit" + i);
+                            try {
+                                Thread.sleep(10000);
+                                if(recordingStatus)
+                                    stopRecording();
+
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            i++;
+                        }else{
+                            break;
+                        }
+                    }
+                }
+                if(!manualStopStatus) {
+
+                    startRecording("dashit3");
+                    try {
+                        Thread.sleep(10000);
+                        stopRecording();
+                        screenSizeHandler.removeCallbacks(mStatusChecker);
+                        generateHash();
+                        windowManager.removeView(surfaceView);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        thread.start();
+    }
+
+    /**
+     * Cleanup tasks when the background service exits: either manually by user or due to collision
+     */
     @Override
     public void onDestroy() {
         manualStopStatus = true;
@@ -157,11 +223,18 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
         return null;
     }
 
+    /**
+     * Check to find if the device is in proper state to handle File write
+     * @return {boolean} writable or not
+     */
     public boolean isExternalStorageWritable() {
         return Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState());
     }
 
-
+    /**
+     * Start recording the video
+     * @param fileName store the following video recording under this name
+     */
     public void startRecording(String fileName){
         recordingStatus = true;
         camera = Camera.open();
@@ -181,6 +254,9 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
         mediaRecorder.start();
     }
 
+    /**
+     * Stop recording video. Executed when called.
+     */
     public void stopRecording() {
         recordingStatus = false;
         mediaRecorder.stop();
@@ -191,6 +267,12 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
         camera.release();
     }
 
+    /**
+     * Executed only when a collision is detected.
+     * Order the videos in correct order.
+     * Get the video files in that order and move them to another location under a new directory.
+     * Create a byte array of video files and generate hash.
+     */
     public void generateHash() {
         int[] orderOfVideo = new int[3];
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -252,6 +334,10 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
         }
     }
 
+    /**
+     * Send the generated hash to Originstamp server
+     * @param hashString the hash to be submitted
+     */
     public void sendHashToServer(String hashString){
         String url = "http://www.originstamp.org/api/stamps";
         String postData = "{\"hash_sha256\" : \""+hashString+"\"}";
@@ -299,49 +385,7 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
         }
     }
 
-    @Override
-    public void surfaceCreated(SurfaceHolder holder) {
-        globalHolder = holder;
-        thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while(!accidentStatus){
-                    int i =1;
-                    while(i < 3) {
-                        if (!accidentStatus && !manualStopStatus) {
-                            accidentOnVideoIndex = i;
-                            startRecording("dashit" + i);
-                            try {
-                                Thread.sleep(10000);
-                                if(recordingStatus)
-                                    stopRecording();
 
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                            i++;
-                        }else{
-                            break;
-                        }
-                    }
-                }
-                if(!manualStopStatus) {
-
-                    startRecording("dashit3");
-                    try {
-                        Thread.sleep(10000);
-                        stopRecording();
-                        screenSizeHandler.removeCallbacks(mStatusChecker);
-                        generateHash();
-                        windowManager.removeView(surfaceView);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        });
-        thread.start();
-    }
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
@@ -353,7 +397,9 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
 
     }
 
-
+    /**
+     * The class which listens to any collision event from SensorService
+     */
     public static class MyBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {

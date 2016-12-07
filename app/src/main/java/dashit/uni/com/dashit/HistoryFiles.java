@@ -5,6 +5,7 @@ import java.util.List;
 
 /**
  * Created by Jagrut on 17-Feb-16.
+ * POJO to store all data related to one History item
  */
 public class HistoryFiles {
     private List<String> filesInDirectory;

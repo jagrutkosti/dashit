@@ -2,6 +2,8 @@ package dashit.uni.com.dashit;
 
 /**
  * Created by Jagrut on 23-Jan-16.
+ * The Video Recording Activity. All monitoring services are triggered from this activity.
+ * View after the user hits 'Record' icon.
  */
 
 import android.content.BroadcastReceiver;
@@ -27,12 +29,6 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
@@ -40,7 +36,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     private static TextView txtView;
     private static ImageView imgView;
-    private GoogleMap googleMap;
 
     private static double latToSend;
     private static double longToSend;
@@ -79,20 +74,22 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         });
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
-                // The next two lines tell the new client that “this” current class will handle connection stuff
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
-                        //fourth line adds the LocationServices API endpoint from GooglePlayServices
                 .addApi(LocationServices.API)
                 .build();
 
         // Create the LocationRequest object
         mLocationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-                .setInterval(10 * 1000)        // 10 seconds, in milliseconds
-                .setFastestInterval(1 * 1000); // 1 second, in milliseconds
+                .setInterval(10 * 1000)
+                .setFastestInterval(1 * 1000);
     }
 
+    /**
+     * The method that adds a Map into this Activity. Removed because of un-necessity.
+     * Code kept for future reference, if requirements change.
+     */
     /*private void initializeMap() {
         if (googleMap == null) {
             googleMap = ((MapFragment) getFragmentManager().findFragmentById(
@@ -174,28 +171,22 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public void onConnectionFailed(ConnectionResult connectionResult) {
         if (connectionResult.hasResolution()) {
             try {
-                // Start an Activity that tries to resolve the error
                 connectionResult.startResolutionForResult(this, CONNECTION_FAILURE_RESOLUTION_REQUEST);
-                    /*
-                     * Thrown if Google Play services canceled the original
-                     * PendingIntent
-                     */
             } catch (IntentSender.SendIntentException e) {
-                // Log the error
                 e.printStackTrace();
             }
         } else {
-                /*
-                 * If no resolution is available, display a dialog to the
-                 * user with the error.
-                 */
             Log.e("Error", "Location services connection failed with code " + connectionResult.getErrorCode());
         }
     }
 
     static int smsCount = 0;
-    public static class MyBroadcastReceiver extends BroadcastReceiver {
 
+    /**
+     * Steps to take in case a collision is detected, notified from SensorService.
+     * Send an SMS containing collision location, if the user has selected for it.
+     */
+    public static class MyBroadcastReceiver extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context context, Intent intent) {

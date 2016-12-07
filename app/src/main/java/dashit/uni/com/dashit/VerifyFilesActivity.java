@@ -7,10 +7,8 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
-import android.app.Activity;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -18,19 +16,19 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.w3c.dom.Text;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
+/**
+ * Activity that shows the visualization related to the History files.
+ * Opens when the user clicks on any List Item in HistoryVerifyActivity
+ */
 public class VerifyFilesActivity extends AppCompatActivity {
     private TextView directoryName;
     private TextView fileViewName1;
@@ -48,6 +46,10 @@ public class VerifyFilesActivity extends AppCompatActivity {
     private RelativeLayout txLayout;
     private AppCompatButton verifyButton;
 
+    /**
+     * Based on various category, which visualization to show
+     * @param savedInstanceState super
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -140,6 +142,12 @@ public class VerifyFilesActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Verify if the newly calculated hash is same as the one stored
+     * @param fileNames The Filepath for all video files, in order
+     * @param savedHash the hash that is saved on the user's storage
+     * @return {boolean} If hash matches or not
+     */
     public boolean verifyHash(ArrayList<String> fileNames, String savedHash){
         boolean hashCheck = false;
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();

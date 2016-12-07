@@ -2,12 +2,12 @@ package dashit.uni.com.dashit;
 
 import android.app.Activity;
 import android.app.Application;
-import android.app.IntentService;
-import android.content.Intent;
 import android.os.Bundle;
 
 /**
  * Created by Jagrut on 27-Nov-16.
+ * Returns the state of any activity within the application.
+ * Main functions to use: isApplicationVisible() and isApplicationInForeground()
  */
 
 public class MyLifeCycleHandler implements Application.ActivityLifecycleCallbacks {

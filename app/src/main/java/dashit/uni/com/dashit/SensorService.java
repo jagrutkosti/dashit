@@ -1,20 +1,18 @@
 package dashit.uni.com.dashit;
 
 import android.app.IntentService;
-import android.app.Service;
 import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.os.IBinder;
-import android.os.ResultReceiver;
 import android.support.annotation.Nullable;
 
 /**
  * Created by Jagrut on 13-Feb-16.
+ * Service to check for collision. Utilized Accelerometer of the smart-phone
  */
 public class SensorService extends IntentService implements SensorEventListener {
 

@@ -12,6 +12,8 @@ import java.util.List;
 
 /**
  * Created by Jagrut on 17-Feb-16.
+ *
+ * NOTE: This class is no longer used.
  */
 public class ExpandableListViewAdapter extends BaseExpandableListAdapter {
 

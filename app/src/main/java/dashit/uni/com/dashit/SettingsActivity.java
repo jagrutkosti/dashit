@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 
 /**
  * Created by Jagrut on 16-Apr-16.
+ * View when the user clicks on 'Settings' from Menu item
  */
 public class SettingsActivity extends AppCompatActivity {
 

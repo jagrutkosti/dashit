@@ -14,6 +14,8 @@ import java.util.List;
 
 /**
  * Created by Jagrut on 17-Feb-16.
+ *
+ * Note: This class is no longer used.
  */
 public class HistoryActivity extends AppCompatActivity {
     ExpandableListViewAdapter adapter;

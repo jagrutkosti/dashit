@@ -16,6 +16,7 @@ import java.util.List;
 
 /**
  * Created by Jagrut on 29-Nov-16.
+ * The Activity which is shown after the user taps on 'History' from Menu item
  */
 
 public class HistoryVerifyActivity extends AppCompatActivity {
@@ -49,6 +50,9 @@ public class HistoryVerifyActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Populating the list view using the HistoryAdapter
+     */
     public void populateView(){
         File rootDirectory = new File(Environment.getExternalStorageDirectory().toString()+"/dashitHistory/");
         if(rootDirectory.exists()){

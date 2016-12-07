@@ -5,6 +5,7 @@ import android.content.Context;
 
 /**
  * Created by Jagrut on 17-Apr-16.
+ * To create application context and initiate a global ActivityLifeCycleCallBack
  */
 public class MyApplication extends Application {
     private static Context context;

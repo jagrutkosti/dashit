@@ -25,6 +25,7 @@ import java.util.List;
 
 /**
  * Created by Jagrut on 29-Nov-16.
+ * The Adapter that links the video folder information and list view for showing the History
  */
 
 public class HistoryAdapter extends BaseAdapter {
@@ -96,6 +97,10 @@ public class HistoryAdapter extends BaseAdapter {
         return rowView;
     }
 
+    /**
+     * Asynchronously check if hash was submitted to Bitcoin Blockchain or not
+     * Accordingly update the List view for 'History'
+     */
     private class HashStatusCheck extends AsyncTask<String, String, String>{
 
         private String directory;
