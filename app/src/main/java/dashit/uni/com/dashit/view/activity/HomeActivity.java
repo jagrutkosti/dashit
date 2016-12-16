@@ -1,4 +1,4 @@
-package dashit.uni.com.dashit;
+package dashit.uni.com.dashit.view.activity;
 
 import android.content.Context;
 import android.content.Intent;
@@ -16,6 +16,8 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import dashit.uni.com.dashit.R;
 
 /**
  * Landing View of the application. Launcher Activity

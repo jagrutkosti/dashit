@@ -1,4 +1,4 @@
-package dashit.uni.com.dashit;
+package dashit.uni.com.dashit.view.adapter;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -22,6 +22,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
+import dashit.uni.com.dashit.R;
+import dashit.uni.com.dashit.model.HistoryFiles;
 
 /**
  * Created by Jagrut on 29-Nov-16.

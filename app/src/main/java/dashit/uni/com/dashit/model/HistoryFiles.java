@@ -1,4 +1,4 @@
-package dashit.uni.com.dashit;
+package dashit.uni.com.dashit.model;
 
 import java.util.ArrayList;
 import java.util.List;

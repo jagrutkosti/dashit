@@ -1,4 +1,4 @@
-package dashit.uni.com.dashit;
+package dashit.uni.com.dashit.view.activity;
 
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -24,6 +24,8 @@ import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+
+import dashit.uni.com.dashit.R;
 
 /**
  * Activity that shows the visualization related to the History files.

@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="#ffffff"
     android:clickable="false"
-    tools:context=".MainActivity">
+    tools:context=".view.activity.MainActivity">
 
     <LinearLayout
         android:id="@+id/contentContainer"

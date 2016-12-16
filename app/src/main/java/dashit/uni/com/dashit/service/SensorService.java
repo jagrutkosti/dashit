@@ -1,4 +1,4 @@
-package dashit.uni.com.dashit;
+package dashit.uni.com.dashit.service;
 
 import android.app.IntentService;
 import android.content.Intent;

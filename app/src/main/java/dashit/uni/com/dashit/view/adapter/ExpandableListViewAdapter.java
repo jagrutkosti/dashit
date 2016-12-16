@@ -1,4 +1,4 @@
-package dashit.uni.com.dashit;
+package dashit.uni.com.dashit.view.adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -7,8 +7,10 @@ import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
 
-import java.util.ArrayList;
 import java.util.List;
+
+import dashit.uni.com.dashit.R;
+import dashit.uni.com.dashit.model.HistoryFiles;
 
 /**
  * Created by Jagrut on 17-Feb-16.

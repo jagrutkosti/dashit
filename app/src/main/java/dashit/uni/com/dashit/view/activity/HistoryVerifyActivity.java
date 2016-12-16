@@ -1,4 +1,4 @@
-package dashit.uni.com.dashit;
+package dashit.uni.com.dashit.view.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,6 +13,10 @@ import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import dashit.uni.com.dashit.R;
+import dashit.uni.com.dashit.model.HistoryFiles;
+import dashit.uni.com.dashit.view.adapter.HistoryAdapter;
 
 /**
  * Created by Jagrut on 29-Nov-16.

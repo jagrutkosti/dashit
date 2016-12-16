@@ -2,7 +2,7 @@
  * Created by Jagrut on 23-Jan-16.
  */
 
-package dashit.uni.com.dashit;
+package dashit.uni.com.dashit.service;
 
 import android.app.Notification;
 import android.app.Service;
@@ -17,14 +17,12 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
-import android.support.v4.content.LocalBroadcastManager;
 import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
 
@@ -44,6 +42,10 @@ import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
+
+import dashit.uni.com.dashit.MyApplication;
+import dashit.uni.com.dashit.MyLifeCycleHandler;
+import dashit.uni.com.dashit.R;
 
 /**
  * The main application logic. All background tasks are synchronized here.
