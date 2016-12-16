@@ -3,4 +3,27 @@
          (such as screen margins) for screens with more than 820dp of available width. This
          would include 7" and 10" devices in landscape (~960dp and ~1280dp respectively). -->
     <dimen name="activity_horizontal_margin">64dp</dimen>
+
+
+
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="nav_header_height">160dp</dimen>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_vertical_margin">16dp</dimen>
+
+
+    <dimen name="design_fab_elevation">6dp</dimen>
+    <dimen name="design_fab_translation_z_pressed">6dp</dimen>
+    <dimen name="design_fab_image_size">24dp</dimen>
+    <dimen name="design_fab_size_normal">72dp</dimen>
+    <dimen name="design_fab_size_mini">40dp</dimen>
+    <dimen name="design_fab_border_width">0.5dp</dimen>
+
+
+    <!-- Font sizes -->
+    <dimen name="settings_labels_fontsize_title">18sp</dimen>
+    <dimen name="settings_labels_fontsize_item">16sp</dimen>
+    <dimen name="settings_labels_fontsize_item_description">14sp</dimen>
+
+    <dimen name="card_margin">8dp</dimen>
 </resources>

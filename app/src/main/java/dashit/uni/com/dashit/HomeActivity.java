@@ -28,8 +28,6 @@ public class HomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        txtView = (TextView)findViewById(R.id.accData);
-
         ImageButton btnStart = (ImageButton) findViewById(R.id.start);
         btnStart.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
