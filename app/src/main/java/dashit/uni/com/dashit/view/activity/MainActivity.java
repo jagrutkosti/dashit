@@ -1,4 +1,4 @@
-package dashit.uni.com.dashit;
+package dashit.uni.com.dashit.view.activity;
 
 /**
  * Created by Jagrut on 23-Jan-16.
@@ -11,18 +11,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -31,12 +29,16 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
+import dashit.uni.com.dashit.MyApplication;
+import dashit.uni.com.dashit.R;
+import dashit.uni.com.dashit.service.BackgroundService;
+import dashit.uni.com.dashit.service.SensorService;
+
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener {
 
-    private static TextView txtView;
     private static ImageView imgView;
 
     private static double latToSend;
@@ -49,14 +51,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private double currentLatitude;
     private double currentLongitude;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        txtView = (TextView)findViewById(R.id.accData);
-        imgView = (ImageView)findViewById(R.id.status);
+        imgView = (ImageView) findViewById(R.id.status);
 
         Intent intent2 = new Intent(MainActivity.this, SensorService.class);
         intent2.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -66,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startService(intent);
 
-        ImageButton btnStop = (ImageButton) findViewById(R.id.stop);
+        FloatingActionButton btnStop = (FloatingActionButton) findViewById(R.id.fab_stop);
         btnStop.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 stopService(new Intent(MainActivity.this, BackgroundService.class));
@@ -118,9 +120,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             googleMap.addMarker(new MarkerOptions().position(new LatLng(currentLatitude, currentLongitude)));
         }
     }*/
-
     @Override
-    public void onBackPressed() { }
+    public void onBackPressed() {
+    }
 
     @Override
     protected void onResume() {
@@ -186,6 +188,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     static int smsCount = 0;
 
+
     /**
      * Steps to take in case a collision is detected, notified from SensorService.
      * Send an SMS containing collision location, if the user has selected for it.
@@ -194,19 +197,17 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            txtView.setTextColor(Color.parseColor("red"));
             imgView.setImageResource(R.drawable.carcollision);
-            txtView.setText(R.string.collision);
-            if(smsCount == 0){
+            if (smsCount == 0) {
                 sendMessage();
                 smsCount++;
             }
         }
 
-        public void sendMessage(){
+        public void sendMessage() {
             //Get data from preferences
             SharedPreferences SP = PreferenceManager.getDefaultSharedPreferences(MyApplication.getAppContext());
-            if(SP.getBoolean("sendSms", false)) {
+            if (SP.getBoolean("sendSms", false)) {
                 String myName = SP.getString("myName", "NA");
                 String myPhoneNumber = SP.getString("myPhoneNumber", "NA");
                 String emergencyContact = SP.getString("contact", "NA");

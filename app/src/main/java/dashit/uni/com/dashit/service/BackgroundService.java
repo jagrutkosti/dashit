@@ -2,7 +2,7 @@
  * Created by Jagrut on 23-Jan-16.
  */
 
-package dashit.uni.com.dashit;
+package dashit.uni.com.dashit.service;
 
 import android.app.Notification;
 import android.app.Service;
@@ -43,11 +43,15 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 
+import dashit.uni.com.dashit.MyApplication;
+import dashit.uni.com.dashit.MyLifeCycleHandler;
+import dashit.uni.com.dashit.R;
+
 /**
  * The main application logic. All background tasks are synchronized here.
  * That includes, Video Recording, File Saving, Hash Creation, Hash Transmission
  */
-public class BackgroundService extends Service implements SurfaceHolder.Callback{
+public class BackgroundService extends Service implements SurfaceHolder.Callback {
 
     private boolean recordingStatus;
     static boolean accidentStatus = false;
@@ -66,6 +70,7 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
     int height = 0;
     int width = 0;
 
+
     /**
      * Create a surface to hold the camera preview. This surface rests above all surface.
      * Create Notification to let the user know anytime that the application is running.
@@ -73,15 +78,16 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
     @Override
     public void onCreate() {
         super.onCreate();
+
         handler = new Handler();
         screenSizeHandler = new Handler();
 
-        if(isExternalStorageWritable()){
+        if (isExternalStorageWritable()) {
             for (int i = 1; i < 4; i++) {
-                File delPreviousFiles = new File(Environment.getExternalStorageDirectory().toString()+"/dashit" + i + ".mp4");
+                File delPreviousFiles = new File(Environment.getExternalStorageDirectory().toString() + "/dashit" + i + ".mp4");
                 delPreviousFiles.delete();
             }
-        }else{
+        } else {
             Toast.makeText(BackgroundService.this, "Storage device not available.", Toast.LENGTH_LONG).show();
             onDestroy();
         }
@@ -96,6 +102,7 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
 
         // Create new SurfaceView, set its size to 50x50, move it to the top left corner and set this service as a callback
         windowManager = (WindowManager) this.getSystemService(Context.WINDOW_SERVICE);
+
         surfaceView = new SurfaceView(this);
 
         DisplayMetrics displaymetrics = new DisplayMetrics();
@@ -104,16 +111,18 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
         width = displaymetrics.widthPixels;
 
         WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(
-                width,height - 500,
+                50, 50,
                 WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY,
                 WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
                 PixelFormat.TRANSLUCENT
         );
+        layoutParams.gravity = Gravity.TOP | Gravity.RIGHT;
         windowManager.addView(surfaceView, layoutParams);
         surfaceView.getHolder().addCallback(this);
 
         mStatusChecker.run();
     }
+
 
     /**
      * A thread which checks if any activity is in foreground or not.
@@ -124,17 +133,19 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
         @Override
         public void run() {
             try {
-                if(MyLifeCycleHandler.isApplicationVisible() || MyLifeCycleHandler.isApplicationInForeground()){
-                    WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(
-                            width,height - 500,
+                if (MyLifeCycleHandler.isApplicationVisible() || MyLifeCycleHandler.isApplicationInForeground()) {
+                    // is in foreground
+                   WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(
+                            width, height - 500,
                             WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY,
                             WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
                             PixelFormat.TRANSLUCENT
                     );
                     windowManager.updateViewLayout(surfaceView, layoutParams);
-                }else{
+
+                } else {
                     WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(
-                            50,50,
+                            50, 50,
                             WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY,
                             WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
                             PixelFormat.TRANSLUCENT
@@ -153,6 +164,7 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
      * When the surface is created, it will start recording the video in infinite loop.
      * The variable 'accidentStatus' changes in MyBroadcastReceiver when a collision is detected
      * to notify when to stop video recording
+     *
      * @param holder The Surface holder on which to attach the camera preview
      */
     @Override
@@ -161,27 +173,27 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
         thread = new Thread(new Runnable() {
             @Override
             public void run() {
-                while(!accidentStatus){
-                    int i =1;
-                    while(i < 3) {
+                while (!accidentStatus) {
+                    int i = 1;
+                    while (i < 3) {
                         if (!accidentStatus && !manualStopStatus) {
                             accidentOnVideoIndex = i;
                             startRecording("dashit" + i);
                             try {
                                 Thread.sleep(10000);
-                                if(recordingStatus)
+                                if (recordingStatus)
                                     stopRecording();
 
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
                             i++;
-                        }else{
+                        } else {
                             break;
                         }
                     }
                 }
-                if(!manualStopStatus) {
+                if (!manualStopStatus) {
 
                     startRecording("dashit3");
                     try {
@@ -205,7 +217,7 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
     @Override
     public void onDestroy() {
         manualStopStatus = true;
-        if(recordingStatus){
+        if (recordingStatus) {
             stopRecording();
         }
         try {
@@ -225,6 +237,7 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
 
     /**
      * Check to find if the device is in proper state to handle File write
+     *
      * @return {boolean} writable or not
      */
     public boolean isExternalStorageWritable() {
@@ -233,9 +246,10 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
 
     /**
      * Start recording the video
+     *
      * @param fileName store the following video recording under this name
      */
-    public void startRecording(String fileName){
+    public void startRecording(String fileName) {
         recordingStatus = true;
         camera = Camera.open();
         mediaRecorder = new MediaRecorder();
@@ -250,7 +264,10 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
 
         mediaRecorder.setOutputFile(Environment.getExternalStorageDirectory().toString() + "/" + fileName + ".mp4");
 
-        try { mediaRecorder.prepare(); } catch (Exception e) {}
+        try {
+            mediaRecorder.prepare();
+        } catch (Exception e) {
+        }
         mediaRecorder.start();
     }
 
@@ -276,22 +293,22 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
     public void generateHash() {
         int[] orderOfVideo = new int[3];
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        if(accidentOnVideoIndex == 2){
+        if (accidentOnVideoIndex == 2) {
             orderOfVideo[0] = 1;
             orderOfVideo[1] = 2;
-        }else{
+        } else {
             orderOfVideo[0] = 2;
             orderOfVideo[1] = 1;
         }
         orderOfVideo[2] = 3;
 
-        File dir = new File(Environment.getExternalStorageDirectory().toString()+"/dashitHistory/"+ DateFormat.format("dd-MM-yyyy HH:mm", new Date().getTime()));
-        if(!dir.isDirectory())
+        File dir = new File(Environment.getExternalStorageDirectory().toString() + "/dashitHistory/" + DateFormat.format("dd-MM-yyyy HH:mm", new Date().getTime()));
+        if (!dir.isDirectory())
             dir.mkdirs();
 
-        for(int i=0;i<3;i++){
-            File file = new File(Environment.getExternalStorageDirectory().toString()+"/dashit"+orderOfVideo[i]+".mp4");
-            if(file.exists() && !file.isDirectory()) {
+        for (int i = 0; i < 3; i++) {
+            File file = new File(Environment.getExternalStorageDirectory().toString() + "/dashit" + orderOfVideo[i] + ".mp4");
+            if (file.exists() && !file.isDirectory()) {
                 byte[] byteArray = new byte[(int) file.length()];
                 try {
                     FileOutputStream target = new FileOutputStream(dir.getPath() + "/" + (i + 1) + "accVideo" + orderOfVideo[i] + ".mp4");
@@ -314,13 +331,13 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
             md.update(finalByte);
             byte[] mdBytes = md.digest();
             StringBuffer hexString = new StringBuffer();
-            for (int i=0;i<mdBytes.length;i++) {
+            for (int i = 0; i < mdBytes.length; i++) {
                 hexString.append(Integer.toHexString(0xFF & mdBytes[i]));
             }
             Log.i("Hex format : ", "" + hexString.toString());
 
             //Create a hash.txt file
-            File hash = new File(dir.getPath()+"/hash.txt");
+            File hash = new File(dir.getPath() + "/hash.txt");
             FileWriter writer = new FileWriter(hash);
             writer.append(hexString.toString());
             writer.flush();
@@ -336,18 +353,19 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
 
     /**
      * Send the generated hash to Originstamp server
+     *
      * @param hashString the hash to be submitted
      */
-    public void sendHashToServer(String hashString){
+    public void sendHashToServer(String hashString) {
         String url = "http://www.originstamp.org/api/stamps";
-        String postData = "{\"hash_sha256\" : \""+hashString+"\"}";
+        String postData = "{\"hash_sha256\" : \"" + hashString + "\"}";
         try {
             URL obj = new URL(url);
             HttpURLConnection con = (HttpURLConnection) obj.openConnection();
             con.setRequestMethod("POST");
             con.setRequestProperty("Content-Type", "application/json");
             con.setRequestProperty("Authorization", "Token token=\"a876e0bbb8894e8c8eadc5b3a19adff7\"");
-            con.setRequestProperty("User-Agent","Mozilla/5.0 ( compatible ) ");
+            con.setRequestProperty("User-Agent", "Mozilla/5.0 ( compatible ) ");
             con.setRequestProperty("Accept", "*/*");
             DataOutputStream dos = new DataOutputStream(con.getOutputStream());
             dos.writeBytes(postData);
@@ -384,7 +402,6 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
             });
         }
     }
-
 
 
     @Override

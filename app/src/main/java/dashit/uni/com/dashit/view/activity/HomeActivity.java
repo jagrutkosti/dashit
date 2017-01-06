@@ -1,4 +1,4 @@
-package dashit.uni.com.dashit;
+package dashit.uni.com.dashit.view.activity;
 
 import android.content.Context;
 import android.content.Intent;
@@ -17,6 +17,8 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import dashit.uni.com.dashit.R;
+
 /**
  * Landing View of the application. Launcher Activity
  */
@@ -27,8 +29,6 @@ public class HomeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-
-        txtView = (TextView)findViewById(R.id.accData);
 
         ImageButton btnStart = (ImageButton) findViewById(R.id.start);
         btnStart.setOnClickListener(new View.OnClickListener() {

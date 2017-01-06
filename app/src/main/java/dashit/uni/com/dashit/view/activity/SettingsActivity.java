@@ -1,9 +1,11 @@
-package dashit.uni.com.dashit;
+package dashit.uni.com.dashit.view.activity;
 
 import android.os.Bundle;
 import android.preference.EditTextPreference;
 import android.preference.PreferenceFragment;
 import android.support.v7.app.AppCompatActivity;
+
+import dashit.uni.com.dashit.R;
 
 /**
  * Created by Jagrut on 16-Apr-16.

@@ -40,7 +40,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".HomeActivity"
+            android:name=".view.activity.HomeActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait">
             <intent-filter>
@@ -50,7 +50,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MainActivity"
+            android:name=".view.activity.MainActivity"
             android:label="@string/recording"
             android:screenOrientation="portrait">
             <intent-filter>
@@ -60,43 +60,43 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".HistoryActivity"
+            android:name=".view.activity.HistoryActivity"
             android:label="@string/action_history"
             android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".HomeActivity" />
+                android:value=".view.activity.HomeActivity" />
         </activity>
         <activity
-            android:name=".HistoryVerifyActivity"
+            android:name=".view.activity.HistoryVerifyActivity"
             android:label="@string/action_history_verify"
             android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".HomeActivity" />
+                android:value=".view.activity.HomeActivity" />
         </activity>
         <activity
-            android:name=".SettingsActivity"
+            android:name=".view.activity.SettingsActivity"
             android:label="@string/action_settings"
             android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".HomeActivity" />
+                android:value=".view.activity.HomeActivity" />
         </activity>
 
         <service
-            android:name=".BackgroundService"
+            android:name=".service.BackgroundService"
             android:exported="false" />
         <service
-            android:name=".SensorService"
+            android:name=".service.SensorService"
             android:exported="false" />
 
-        <receiver android:name=".BackgroundService$MyBroadcastReceiver">
+        <receiver android:name=".service.BackgroundService$MyBroadcastReceiver">
             <intent-filter>
                 <action android:name="com.example.Broadcast"></action>
             </intent-filter>
         </receiver>
-        <receiver android:name=".MainActivity$MyBroadcastReceiver">
+        <receiver android:name=".view.activity.MainActivity$MyBroadcastReceiver">
             <intent-filter>
                 <action android:name="com.example.Broadcast"></action>
             </intent-filter>
@@ -107,12 +107,12 @@
             android:value="AIzaSyCqlvVSK2a6pNjMWH_IrRBTa_YbdYszoVw" />
 
         <activity
-            android:name=".VerifyFilesActivity"
+            android:name=".view.activity.VerifyFilesActivity"
             android:label="@string/title_activity_verify_files"
-            android:parentActivityName=".HistoryVerifyActivity">
+            android:parentActivityName=".view.activity.HistoryVerifyActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="dashit.uni.com.dashit.HistoryVerifyActivity" />
+                android:value="dashit.uni.com.dashit.view.activity.HistoryVerifyActivity" />
         </activity>
     </application>
 

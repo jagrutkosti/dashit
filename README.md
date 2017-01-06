@@ -10,4 +10,8 @@ The main idea is to timestamp the video just after an incident has been recorded
 
 [1] B. Gipp, N. Meuschke, and A. Gernandt. Decentralized Trusted Timestamping using the Crypto Currency Bitcoin. In Proceedings of the iConference 2015 (to appear), Newport Beach, CA, USA, Mar. 24 -27, 2015.
 
+##### Reference
+Gipp, Bela; Kosti, Jagrut; and Breitinger, Corinna, "Securing Video Integrity Using Decentralized Trusted Timestamping on the Bitcoin Blockchain" (2016). MCIS 2016 Proceedings. Paper 51.
+http://aisel.aisnet.org/mcis2016/51
+
 ##### This project is MIT Licensed. 
