@@ -38,7 +38,7 @@ public class SensorService extends IntentService implements SensorEventListener 
 
             if(Math.abs(x-last_x) > 8 || Math.abs(y-last_y) > 8 || Math.abs(z-last_z) > 8){
                 Intent intent = new Intent();
-                intent.setAction("com.example.Broadcast");
+                intent.setAction("com.collision.Broadcast");
                 intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
                 sendBroadcast(intent);
             }

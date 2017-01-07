@@ -10,7 +10,7 @@ import android.os.Bundle;
  * Main functions to use: isApplicationVisible() and isApplicationInForeground()
  */
 
-public class MyLifeCycleHandler implements Application.ActivityLifecycleCallbacks {
+public class ActivityLifeCycleHandler implements Application.ActivityLifecycleCallbacks {
     private static int resumed;
     private static int paused;
     private static int started;

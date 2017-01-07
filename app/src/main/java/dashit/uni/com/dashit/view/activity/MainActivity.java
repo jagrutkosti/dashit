@@ -29,7 +29,7 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
-import dashit.uni.com.dashit.MyApplication;
+import dashit.uni.com.dashit.DashItApplication;
 import dashit.uni.com.dashit.R;
 import dashit.uni.com.dashit.service.BackgroundService;
 import dashit.uni.com.dashit.service.SensorService;
@@ -193,7 +193,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
      * Steps to take in case a collision is detected, notified from SensorService.
      * Send an SMS containing collision location, if the user has selected for it.
      */
-    public static class MyBroadcastReceiver extends BroadcastReceiver {
+    public static class CollisionBroadcastReceiver extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -206,7 +206,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         public void sendMessage() {
             //Get data from preferences
-            SharedPreferences SP = PreferenceManager.getDefaultSharedPreferences(MyApplication.getAppContext());
+            SharedPreferences SP = PreferenceManager.getDefaultSharedPreferences(DashItApplication.getAppContext());
             if (SP.getBoolean("sendSms", false)) {
                 String myName = SP.getString("myName", "NA");
                 String myPhoneNumber = SP.getString("myPhoneNumber", "NA");
@@ -223,7 +223,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     try {
                         SmsManager smsManager = SmsManager.getDefault();
                         smsManager.sendTextMessage(emergencyContact, null, message, null, null);
-                        Toast.makeText(MyApplication.getAppContext(), "SMS Sent!",
+                        Toast.makeText(DashItApplication.getAppContext(), "SMS Sent!",
                                 Toast.LENGTH_LONG).show();
                     } catch (Exception e) {
                         e.printStackTrace();

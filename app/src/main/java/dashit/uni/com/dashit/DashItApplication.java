@@ -7,16 +7,16 @@ import android.content.Context;
  * Created by Jagrut on 17-Apr-16.
  * To create application context and initiate a global ActivityLifeCycleCallBack
  */
-public class MyApplication extends Application {
+public class DashItApplication extends Application {
     private static Context context;
 
     public void onCreate() {
         super.onCreate();
-        MyApplication.context = getApplicationContext();
-        registerActivityLifecycleCallbacks(new MyLifeCycleHandler());
+        DashItApplication.context = getApplicationContext();
+        registerActivityLifecycleCallbacks(new ActivityLifeCycleHandler());
     }
 
     public static Context getAppContext() {
-        return MyApplication.context;
+        return DashItApplication.context;
     }
 }

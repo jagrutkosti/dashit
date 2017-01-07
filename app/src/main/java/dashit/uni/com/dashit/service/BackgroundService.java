@@ -10,7 +10,6 @@ import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.PixelFormat;
 import android.hardware.Camera;
 import android.media.CamcorderProfile;
@@ -45,8 +44,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 
-import dashit.uni.com.dashit.MyApplication;
-import dashit.uni.com.dashit.MyLifeCycleHandler;
+import dashit.uni.com.dashit.ActivityLifeCycleHandler;
+import dashit.uni.com.dashit.DashItApplication;
 import dashit.uni.com.dashit.R;
 import dashit.uni.com.dashit.view.activity.MainActivity;
 
@@ -147,7 +146,7 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
         @Override
         public void run() {
             try {
-                if (MyLifeCycleHandler.isApplicationVisible() || MyLifeCycleHandler.isApplicationInForeground()) {
+                if (ActivityLifeCycleHandler.isApplicationVisible() || ActivityLifeCycleHandler.isApplicationInForeground()) {
                     // is in foreground
                    WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(
                             width, height - 500,
@@ -395,7 +394,7 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
             handler.post(new Runnable() {
                 @Override
                 public void run() {
-                    Toast.makeText(MyApplication.getAppContext(), "Hash sent successfully!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(DashItApplication.getAppContext(), "Hash sent successfully!", Toast.LENGTH_LONG).show();
                 }
             });
         } catch (MalformedURLException e) {
@@ -431,7 +430,7 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
     /**
      * The class which listens to any collision event from SensorService
      */
-    public static class MyBroadcastReceiver extends BroadcastReceiver {
+    public static class CollisionBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             accidentStatus = true;

@@ -32,7 +32,7 @@
         android:required="true" />
 
     <application
-        android:name=".MyApplication"
+        android:name=".DashItApplication"
         android:allowBackup="true"
         android:hardwareAccelerated="false"
         android:largeHeap="true"
@@ -92,14 +92,14 @@
             android:name=".service.SensorService"
             android:exported="false" />
 
-        <receiver android:name=".service.BackgroundService$MyBroadcastReceiver">
+        <receiver android:name=".service.BackgroundService$CollisionBroadcastReceiver">
             <intent-filter>
-                <action android:name="com.example.Broadcast"></action>
+                <action android:name="com.collision.Broadcast" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".view.activity.MainActivity$MyBroadcastReceiver">
+        <receiver android:name=".view.activity.MainActivity$CollisionBroadcastReceiver">
             <intent-filter>
-                <action android:name="com.example.Broadcast"></action>
+                <action android:name="com.collision.Broadcast" />
             </intent-filter>
         </receiver>
 
