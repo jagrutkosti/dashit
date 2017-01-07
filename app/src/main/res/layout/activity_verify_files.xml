@@ -13,7 +13,7 @@
 
     <TextView
         android:id="@+id/fileName1"
-        android:text="TextView"
+        android:text="@string/fileName"
         android:layout_below="@+id/directoryVerify"
         android:layout_alignParentStart="true"
         android:background="@drawable/ic_movie_black_48dp"
@@ -26,7 +26,7 @@
         android:layout_height="80dp" />
 
     <TextView
-        android:text="TextView"
+        android:text="@string/fileName"
         android:layout_width="70dp"
         android:layout_height="80dp"
         android:id="@+id/fileName2"
@@ -40,7 +40,7 @@
         android:paddingRight="5dp" />
 
     <TextView
-        android:text="TextView"
+        android:text="@string/fileName"
         android:layout_width="70dp"
         android:layout_height="80dp"
         android:id="@+id/fileName3"
@@ -54,7 +54,7 @@
         android:paddingRight="5dp" />
 
     <TextView
-        android:text="TextView"
+        android:text="@string/directoryName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/directoryVerify"
@@ -99,7 +99,7 @@
             android:background="@drawable/hashtag" />
 
         <TextView
-            android:text="TextView"
+            android:text="@string/hashValue"
             android:layout_width="wrap_content"
             android:id="@+id/hashValue"
             android:layout_height="40dp"
@@ -132,7 +132,7 @@
         android:visibility="invisible" />
 
     <TextView
-        android:text="TextView"
+        android:text="@string/hashSubmission"
         android:layout_width="match_parent"
         android:layout_height="30dp"
         android:id="@+id/hashSubmission"
@@ -173,7 +173,7 @@
             android:visibility="visible" />
 
         <TextView
-            android:text="TextView"
+            android:text="@string/hashValue"
             android:layout_width="wrap_content"
             android:id="@+id/txHashText"
             android:layout_height="40dp"
@@ -207,7 +207,7 @@
         android:layout_centerHorizontal="true" />
 
     <android.support.v7.widget.AppCompatButton
-        android:text="Verify"
+        android:text="@string/verifyButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"

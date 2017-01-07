@@ -17,4 +17,9 @@
     <string name="hashSubmission">Hash submitted to Bitcoin Blockchain</string>
     <string name="hashNoSubmission">Hash has NOT been submitted to Bitcoin Blockchain</string>
     <string name="transactionHash">Transaction Hash</string>
+    <string name="startRecordingDesc">Tap to start recording</string>
+    <string name="fileName">File Name</string>
+    <string name="directoryName">Directory Name</string>
+    <string name="hashValue">Hash Value</string>
+    <string name="verifyButton">Verify</string>
 </resources>

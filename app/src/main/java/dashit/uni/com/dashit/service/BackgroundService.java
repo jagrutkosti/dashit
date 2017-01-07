@@ -5,10 +5,12 @@
 package dashit.uni.com.dashit.service;
 
 import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.PixelFormat;
 import android.hardware.Camera;
 import android.media.CamcorderProfile;
@@ -46,6 +48,7 @@ import java.util.Date;
 import dashit.uni.com.dashit.MyApplication;
 import dashit.uni.com.dashit.MyLifeCycleHandler;
 import dashit.uni.com.dashit.R;
+import dashit.uni.com.dashit.view.activity.MainActivity;
 
 /**
  * The main application logic. All background tasks are synchronized here.
@@ -92,13 +95,24 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
             onDestroy();
         }
 
+        //Intent to start when user taps on notification
+        Intent notificationIntent = new Intent(getApplicationContext(), MainActivity.class);
+        notificationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+        PendingIntent contentIntent = PendingIntent.getActivity(getApplicationContext(), 0,
+                notificationIntent, 0);
+
         // Start foreground service to avoid unexpected kill
         Notification notification = new Notification.Builder(this)
                 .setContentTitle("DashIt")
-                .setContentText("The app is running.")
+                .setContentText("Video is recorded in background.")
                 .setSmallIcon(R.drawable.ic_launcher)
+                .setContentIntent(contentIntent)
                 .build();
-        startForeground(1234, notification);
+
+        notification.flags = Notification.FLAG_AUTO_CANCEL | Notification.FLAG_ONGOING_EVENT;
+        startForeground(Integer.MAX_VALUE, notification);
 
         // Create new SurfaceView, set its size to 50x50, move it to the top left corner and set this service as a callback
         windowManager = (WindowManager) this.getSystemService(Context.WINDOW_SERVICE);
