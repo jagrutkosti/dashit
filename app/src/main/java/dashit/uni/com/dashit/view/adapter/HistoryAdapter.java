@@ -79,7 +79,7 @@ public class HistoryAdapter extends BaseAdapter {
 
         List<String> files = directory.getFilesInDirectory();
         for(String fileName : files){
-            if(fileName.endsWith(".txt")){
+            if(fileName.endsWith("hash.txt")){
                 File hashFile = new File(fileName);
                 StringBuilder hash = new StringBuilder();
                 try{

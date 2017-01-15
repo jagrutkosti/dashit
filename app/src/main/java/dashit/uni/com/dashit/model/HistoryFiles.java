@@ -8,7 +8,9 @@ import java.util.List;
  * POJO to store all data related to one History item
  */
 public class HistoryFiles {
+    //Absolute path
     private List<String> filesInDirectory;
+    //Only the directory name
     private String directory;
     private String txHash;
     private String recipient;
