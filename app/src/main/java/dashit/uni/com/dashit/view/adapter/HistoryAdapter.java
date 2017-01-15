@@ -3,6 +3,7 @@ package dashit.uni.com.dashit.view.adapter;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,7 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -116,27 +118,45 @@ public class HistoryAdapter extends BaseAdapter {
         @Override
         protected String doInBackground(String... hashString) {
             directory = hashString[1];
-            String url = context.getString(R.string.timestampUrl);
-            StringBuffer buffer = new StringBuffer();
-            try {
-                URL obj = new URL(url+hashString[0]);
-                HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-                con.setRequestMethod("GET");
-                con.setRequestProperty("Authorization", "Token token=\""+context.getString(R.string.timestampToken)+"\"");
-                con.setRequestProperty("User-Agent", "Mozilla/5.0 ( compatible ) ");
-                con.setRequestProperty("Accept", "*/*");
-                String line;
-
-                BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
-                while ((line = reader.readLine()) != null) {
-                    buffer.append(line);
+            File transactionDataFile = new File(Environment.getExternalStorageDirectory().toString() + "/dashitHistory/" + directory + "/transactionData.txt");
+            if(transactionDataFile.exists()){
+                StringBuilder transactionData = new StringBuilder();
+                try{
+                    BufferedReader br = new BufferedReader(new FileReader(transactionDataFile));
+                    String line;
+                    while((line = br.readLine()) != null){
+                        transactionData.append(line);
+                    }
+                    br.close();
+                    JSONObject jsonObject = new JSONObject(transactionData.toString());
+                    setDataSourceProperties(jsonObject);
+                } catch (IOException | JSONException e) {
+                    e.printStackTrace();
                 }
-                reader.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+                return "";
+            }else {
+                String url = context.getString(R.string.timestampUrl);
+                StringBuffer buffer = new StringBuffer();
+                try {
+                    URL obj = new URL(url + hashString[0]);
+                    HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+                    con.setRequestMethod("GET");
+                    con.setRequestProperty("Authorization", "Token token=\"" + context.getString(R.string.timestampToken) + "\"");
+                    con.setRequestProperty("User-Agent", "Mozilla/5.0 ( compatible ) ");
+                    con.setRequestProperty("Accept", "*/*");
+                    String line;
 
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                    while ((line = reader.readLine()) != null) {
+                        buffer.append(line);
+                    }
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+
+                }
+                return buffer.toString();
             }
-            return buffer.toString();
         }
 
         @Override
@@ -144,29 +164,43 @@ public class HistoryAdapter extends BaseAdapter {
             try {
                 JSONObject jsonObject = new JSONObject(result);
                 if(jsonObject.has("blockchain_transaction")) {
-                    JSONObject blockchainTran = jsonObject.getJSONObject("blockchain_transaction");
-                    for (HistoryFiles file : dataSource) {
-                        if (file.getDirectory().equalsIgnoreCase(directory)) {
-                            if (blockchainTran.has("tx_hash"))
-                                file.setTxHash(blockchainTran.getString("tx_hash"));
-                            if (blockchainTran.has("recipient"))
-                                file.setRecipient(blockchainTran.getString("recipient"));
-                            if (blockchainTran.has("updated_at"))
-                                file.setSubmissionTime(blockchainTran.getString("updated_at"));
-                            if (blockchainTran.has("private_key"))
-                                file.setPrivateKey(blockchainTran.getString("private_key"));
-                            if (blockchainTran.has("public_key"))
-                                file.setPublicKey(blockchainTran.getString("public_key"));
-                            if (blockchainTran.has("seed"))
-                                file.setSeed(blockchainTran.getString("seed"));
-                        }
+                    //Save the transaction data to a text file, if available
+                    File transactionDataFile = new File(Environment.getExternalStorageDirectory().toString() + "/dashitHistory/" + directory + "/transactionData.txt");
+                    FileWriter writeTransactionDataToFile = new FileWriter(transactionDataFile);
+                    writeTransactionDataToFile.append(result);
+                    writeTransactionDataToFile.flush();
+                    writeTransactionDataToFile.close();
+
+                    setDataSourceProperties(jsonObject);
+                }
+            } catch (JSONException | IOException e) {
+                e.printStackTrace();
+            }
+            adapter.notifyDataSetChanged();
+        }
+
+        public void setDataSourceProperties (JSONObject jsonObject){
+            try{
+                JSONObject blockchainTran = jsonObject.getJSONObject("blockchain_transaction");
+                for (HistoryFiles file : dataSource) {
+                    if (file.getDirectory().equalsIgnoreCase(directory)) {
+                        if (blockchainTran.has("tx_hash"))
+                            file.setTxHash(blockchainTran.getString("tx_hash"));
+                        if (blockchainTran.has("recipient"))
+                            file.setRecipient(blockchainTran.getString("recipient"));
+                        if (blockchainTran.has("updated_at"))
+                            file.setSubmissionTime(blockchainTran.getString("updated_at"));
+                        if (blockchainTran.has("private_key"))
+                            file.setPrivateKey(blockchainTran.getString("private_key"));
+                        if (blockchainTran.has("public_key"))
+                            file.setPublicKey(blockchainTran.getString("public_key"));
+                        if (blockchainTran.has("seed"))
+                            file.setSeed(blockchainTran.getString("seed"));
                     }
-                    adapter.notifyDataSetChanged();
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-
         }
     }
 }
