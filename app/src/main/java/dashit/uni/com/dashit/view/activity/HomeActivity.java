@@ -5,8 +5,10 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.ResultReceiver;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -23,7 +25,7 @@ import dashit.uni.com.dashit.R;
  * Landing View of the application. Launcher Activity
  */
 public class HomeActivity extends AppCompatActivity {
-    TextView txtView;
+    boolean networkStatus;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,10 +40,7 @@ public class HomeActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-
-        boolean networkStatus = isOnline();
-        if(!networkStatus)
-            Toast.makeText(this, "Please connect to Internet.", Toast.LENGTH_LONG).show();
+        new CheckNetworkStatus().execute();
     }
 
     @Override
@@ -80,49 +79,19 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     /**
-     * Check if Wifi or Data Connection is available or not
+     * Check if Wifi or Data Connection is available or not, asynchronously
      * @return {boolean}
      */
-    public boolean isOnline() {
-        ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-        return (networkInfo != null && networkInfo.isConnected());
-    }
-
-    class MyResultReceiver extends ResultReceiver{
-
-        /**
-         * Create a new ResultReceive to receive results.  Your
-         * {@link #onReceiveResult} method will be called from the thread running
-         * <var>handler</var> if given, or from an arbitrary thread if null.
-         *
-         * @param handler
-         */
-        public MyResultReceiver(Handler handler) {
-            super(handler);
-        }
+    public class CheckNetworkStatus extends AsyncTask<Void, Void, Void> {
 
         @Override
-        protected void onReceiveResult(int resultCode, Bundle resultData){
-            if(resultCode == 100){
-                runOnUiThread(new UpdateUI(resultData.getString("state")));
-            }
+        protected Void doInBackground(Void... voids) {
+            ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+            networkStatus = (networkInfo != null && networkInfo.isConnected());
+            if(!networkStatus)
+                Snackbar.make(findViewById(android.R.id.content), "Please connect to Internet", Snackbar.LENGTH_INDEFINITE).show();
+            return null;
         }
     }
-
-    class UpdateUI implements Runnable{
-        String updateString;
-
-        public UpdateUI(String updateString) {
-            this.updateString = updateString;
-        }
-        public void run() {
-            if(updateString.equalsIgnoreCase("Accident!!!"))
-                txtView.setTextColor(Color.parseColor("red"));
-            else
-                txtView.setTextColor(Color.parseColor("black"));
-            txtView.setText(updateString);
-        }
-    }
-
 }

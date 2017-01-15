@@ -22,4 +22,5 @@
     <string name="directoryName">Directory Name</string>
     <string name="hashValue">Hash Value</string>
     <string name="verifyButton">Verify</string>
+    <string name="menuContextDelete">Delete</string>
 </resources>

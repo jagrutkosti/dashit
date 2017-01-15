@@ -4,12 +4,18 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
+import android.view.ContextMenu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import org.apache.commons.io.FileUtils;
+
 import java.io.File;
 import java.io.FileFilter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -26,6 +32,7 @@ import dashit.uni.com.dashit.view.adapter.HistoryAdapter;
 public class HistoryVerifyActivity extends AppCompatActivity {
     private ListView mListView;
     private ArrayList<HistoryFiles> itemList = new ArrayList<>();
+    private HistoryAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -34,6 +41,7 @@ public class HistoryVerifyActivity extends AppCompatActivity {
 
         mListView = (ListView) findViewById(R.id.dates);
         populateView();
+        registerForContextMenu(mListView);
 
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
@@ -54,6 +62,33 @@ public class HistoryVerifyActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    public void onCreateContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo) {
+        if (view.getId()== R.id.dates) {
+            MenuInflater inflater = getMenuInflater();
+            inflater.inflate(R.menu.menu_context, contextMenu);
+        }
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        switch(item.getItemId()) {
+            case R.id.contextDelete:
+                HistoryFiles directory = (HistoryFiles) mListView.getItemAtPosition(info.position);
+                File directoryToDelete = new File(Environment.getExternalStorageDirectory().toString()+"/dashitHistory/" + directory.getDirectory());
+                try {
+                    FileUtils.deleteDirectory(directoryToDelete);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                itemList.remove(directory);
+                mListView.invalidateViews();
+                return true;
+            default:
+                return super.onContextItemSelected(item);
+        }
+    }
     /**
      * Populating the list view using the HistoryAdapter
      */
@@ -81,9 +116,8 @@ public class HistoryVerifyActivity extends AppCompatActivity {
                 files.setFilesInDirectory(fileNames);
                 itemList.add(files);
             }
-            HistoryAdapter adapter = new HistoryAdapter(this, itemList);
+            adapter = new HistoryAdapter(this, itemList);
             mListView.setAdapter(adapter);
         }
-
     }
 }
