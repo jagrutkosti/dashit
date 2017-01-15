@@ -370,14 +370,14 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
      * @param hashString the hash to be submitted
      */
     public void sendHashToServer(String hashString) {
-        String url = "http://www.originstamp.org/api/stamps";
+        String url = getString(R.string.timestampUrl);
         String postData = "{\"hash_sha256\" : \"" + hashString + "\"}";
         try {
             URL obj = new URL(url);
             HttpURLConnection con = (HttpURLConnection) obj.openConnection();
             con.setRequestMethod("POST");
             con.setRequestProperty("Content-Type", "application/json");
-            con.setRequestProperty("Authorization", "Token token=\"a876e0bbb8894e8c8eadc5b3a19adff7\"");
+            con.setRequestProperty("Authorization", "Token token=\""+getString(R.string.timestampToken)+"\"");
             con.setRequestProperty("User-Agent", "Mozilla/5.0 ( compatible ) ");
             con.setRequestProperty("Accept", "*/*");
             DataOutputStream dos = new DataOutputStream(con.getOutputStream());

@@ -116,13 +116,13 @@ public class HistoryAdapter extends BaseAdapter {
         @Override
         protected String doInBackground(String... hashString) {
             directory = hashString[1];
-            String url = "http://www.originstamp.org/api/stamps/";
+            String url = context.getString(R.string.timestampUrl);
             StringBuffer buffer = new StringBuffer();
             try {
                 URL obj = new URL(url+hashString[0]);
                 HttpURLConnection con = (HttpURLConnection) obj.openConnection();
                 con.setRequestMethod("GET");
-                con.setRequestProperty("Authorization", "Token token=\"a876e0bbb8894e8c8eadc5b3a19adff7\"");
+                con.setRequestProperty("Authorization", "Token token=\""+context.getString(R.string.timestampToken)+"\"");
                 con.setRequestProperty("User-Agent", "Mozilla/5.0 ( compatible ) ");
                 con.setRequestProperty("Accept", "*/*");
                 String line;

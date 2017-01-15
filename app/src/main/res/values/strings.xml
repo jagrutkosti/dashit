@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">DashIt</string>
-
+    <string name="timestampUrl">http://www.originstamp.org/api/stamps/</string>
+    <string name="timestampToken">a876e0bbb8894e8c8eadc5b3a19adff7</string>
+    <string name="verifyHashUrl">https://blockchain.info/</string>
     <string name="recording">Recording</string>
     <string name="action_history">History</string>
     <string name="action_history_verify">History</string>

@@ -89,7 +89,7 @@ public class VerifyFilesActivity extends AppCompatActivity {
         verifyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Uri uri = Uri.parse("https://blockchain.info/");
+                Uri uri = Uri.parse(getString(R.string.verifyHashUrl));
                 Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
             }
