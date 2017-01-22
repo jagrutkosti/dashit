@@ -133,7 +133,7 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
         windowManager.addView(surfaceView, layoutParams);
         surfaceView.getHolder().addCallback(this);
 
-        mStatusChecker.run();
+        //mStatusChecker.run();
     }
 
 

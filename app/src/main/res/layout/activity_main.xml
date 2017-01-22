@@ -102,10 +102,11 @@
                 android:background="@color/grey"
                 android:orientation="vertical">
 
-                <SurfaceView
+                <fragment
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:id="@+id/surfaceView"/>
+                    android:name="com.google.android.gms.maps.SupportMapFragment"
+                    android:id="@+id/map" />
 
             </LinearLayout>
 
