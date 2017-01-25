@@ -85,10 +85,14 @@ public class LocationChangeService extends Service implements GoogleApiClient.Co
                     float distanceInMeters = lastLocation.distanceTo(currentLocation);
 
                     if(distanceInMeters < 50.00){
-                        Intent intent = new Intent();
-                        intent.setAction("com.collisionDetected.Broadcast");
-                        intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
-                        sendBroadcast(intent);
+                        String accidentLocation = String.valueOf(lastLocation.getLatitude());
+                        accidentLocation = accidentLocation + "," + String.valueOf(lastLocation.getLongitude());
+
+                        Intent collisionDetectedIntent = new Intent();
+                        collisionDetectedIntent.setAction("com.collisionDetected.Broadcast");
+                        collisionDetectedIntent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
+                        collisionDetectedIntent.putExtra("accidentLocation", accidentLocation);
+                        sendBroadcast(collisionDetectedIntent);
                     }
                 } catch (InterruptedException e) {
                     e.printStackTrace();

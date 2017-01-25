@@ -19,6 +19,15 @@ public class HistoryFiles {
     private String publicKey;
     private String seed;
     private String savedHash;
+    private String accidentLocation;
+
+    public String getAccidentLocation() {
+        return accidentLocation;
+    }
+
+    public void setAccidentLocation(String accidentLocation) {
+        this.accidentLocation = accidentLocation;
+    }
 
     public String getSavedHash() {
         return savedHash;

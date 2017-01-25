@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 System.exit(0);
             }
         });
-        registerReceiver(collisionBroadcastReceiver, new IntentFilter("COLLISION_DETECTED"));
+        registerReceiver(collisionBroadcastReceiver, new IntentFilter("COLLISION_DETECTED_INTERNAL"));
         Snackbar.make(findViewById(android.R.id.content), "You can switch application", Snackbar.LENGTH_LONG).show();
 
         // Create the LocationRequest object
@@ -209,7 +209,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
      */
     BroadcastReceiver collisionBroadcastReceiver = new BroadcastReceiver() {
         @Override
-        public void onReceive(Context context, Intent intent) {
+        public void onReceive(Context context, final Intent intent) {
             AlertDialog.Builder confirmDialogBuilder = new AlertDialog.Builder(MainActivity.this);
             confirmDialogBuilder.setMessage("Was this a collision?");
             confirmDialogBuilder.setCancelable(false);
@@ -220,11 +220,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     new DialogInterface.OnClickListener() {
                         //Confirm collision and then notify BackgroundService of the same
                         public void onClick(DialogInterface dialog, int id) {
-                            sendMessage();
-                            Intent intent = new Intent();
-                            intent.setAction("com.collisionConfirmed.Broadcast");
-                            intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
-                            sendBroadcast(intent);
+                            Intent collisionConfirmedIntent = new Intent();
+                            collisionConfirmedIntent.setAction("com.collisionConfirmed.Broadcast");
+                            collisionConfirmedIntent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
+                            collisionConfirmedIntent.putExtra("accidentLocation", (String) intent.getExtras().get("accidentLocation"));
+                            sendBroadcast(collisionConfirmedIntent);
                             dialog.cancel();
                         }
                     });
@@ -251,11 +251,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     if(confirmDialog.isShowing()){
                         //No User Input. Confirm Collision Automatically.
                         confirmDialog.cancel();
-                        sendMessage();
-                        Intent intent = new Intent();
-                        intent.setAction("com.collisionConfirmed.Broadcast");
-                        intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
-                        sendBroadcast(intent);
+                        Intent collisionConfirmedIntent = new Intent();
+                        collisionConfirmedIntent.setAction("com.collisionConfirmed.Broadcast");
+                        collisionConfirmedIntent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
+                        collisionConfirmedIntent.putExtra("accidentLocation", (String) intent.getExtras().get("accidentLocation"));
+                        sendBroadcast(collisionConfirmedIntent);
                     }
 
                 }
@@ -265,38 +265,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     };
 
     /**
-     * Send message to emergency contact f the user has chosen to do so in SettingsActivity
-     * Data sent: App User's Name, Phone Number and Accident Location
-     */
-    public void sendMessage() {
-        //Get data from preferences
-        SharedPreferences SP = PreferenceManager.getDefaultSharedPreferences(DashItApplication.getAppContext());
-        if (SP.getBoolean("sendSms", false)) {
-            String myName = SP.getString("myName", "NA");
-            String myPhoneNumber = SP.getString("myPhoneNumber", "NA");
-            String emergencyContact = SP.getString("contact", "NA");
-            String location = "http://maps.google.com/?q=";
-            location += latToSend + "," + longToSend;
-            String message = "Your contact: " + myName + "\n needs urgent help!" +
-                    "\n Phone number: " + myPhoneNumber + "," +
-                    "\n Current location: " + location;
-
-            System.out.println(message);
-            //Send SMS
-            if (emergencyContact.length() > 2 && !emergencyContact.equalsIgnoreCase("NA")) {
-                try {
-                    SmsManager smsManager = SmsManager.getDefault();
-                    smsManager.sendTextMessage(emergencyContact, null, message, null, null);
-                    Toast.makeText(DashItApplication.getAppContext(), "SMS Sent!",
-                            Toast.LENGTH_LONG).show();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
-    /**
      * Steps to take in case a collision is detected, notified from LocationChangeService.
      */
     public static class CollisionBroadcastReceiver extends BroadcastReceiver {
@@ -304,7 +272,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         @Override
         public void onReceive(Context context, Intent intent) {
             imgView.setImageResource(R.drawable.carcollision);
-            context.sendBroadcast(new Intent("COLLISION_DETECTED"));
+            Intent collisionDetectionFromLocation = new Intent("COLLISION_DETECTED_INTERNAL");
+            collisionDetectionFromLocation.putExtra("accidentLocation", (String) intent.getExtras().get("accidentLocation"));
+            context.sendBroadcast(collisionDetectionFromLocation);
         }
 
 

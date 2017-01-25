@@ -27,6 +27,7 @@ import java.util.List;
 
 import dashit.uni.com.dashit.R;
 import dashit.uni.com.dashit.model.HistoryFiles;
+import dashit.uni.com.dashit.model.SHAHashTasks;
 
 /**
  * Created by Jagrut on 29-Nov-16.
@@ -70,7 +71,8 @@ public class HistoryAdapter extends BaseAdapter {
         ImageView hashStatus = (ImageView) rowView.findViewById(R.id.hashStatus);
 
         HistoryFiles directory = (HistoryFiles) getItem(position);
-        textLabel.setText(directory.getDirectory());
+        String directoryName = directory.getDirectory().substring(directory.getDirectory().lastIndexOf("/") + 1);
+        textLabel.setText(directoryName);
 
         if(directory.getTxHash() != null && directory.getTxHash().length() > 0)
             hashStatus.setImageResource(R.drawable.seed_submitted);
@@ -95,7 +97,7 @@ public class HistoryAdapter extends BaseAdapter {
                 if(!directory.isCheckedAtServer()) {
                     directory.setCheckedAtServer(true);
                     directory.setSavedHash(hash.toString());
-                    new HashStatusCheck(this).execute(hash.toString(), directory.getDirectory());
+                    new HashStatusCheck(this).execute(hash.toString(), directoryName);
                 }
             }
         }
@@ -135,27 +137,7 @@ public class HistoryAdapter extends BaseAdapter {
                 }
                 return "";
             }else {
-                String url = context.getString(R.string.timestampUrl);
-                StringBuffer buffer = new StringBuffer();
-                try {
-                    URL obj = new URL(url + hashString[0]);
-                    HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-                    con.setRequestMethod("GET");
-                    con.setRequestProperty("Authorization", "Token token=\"" + context.getString(R.string.timestampToken) + "\"");
-                    con.setRequestProperty("User-Agent", "Mozilla/5.0 ( compatible ) ");
-                    con.setRequestProperty("Accept", "*/*");
-                    String line;
-
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
-                    while ((line = reader.readLine()) != null) {
-                        buffer.append(line);
-                    }
-                    reader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-
-                }
-                return buffer.toString();
+                return SHAHashTasks.getDataForHash(hashString[0]);
             }
         }
 

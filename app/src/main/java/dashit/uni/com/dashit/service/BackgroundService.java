@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.hardware.Camera;
+import android.location.Location;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
 import android.os.Environment;
@@ -61,6 +62,7 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
     int accidentOnVideoIndex = 0;
     Handler handler;
     Handler screenSizeHandler;
+    static String accidentLocation;
 
     private WindowManager windowManager;
     private SurfaceView surfaceView;
@@ -142,7 +144,7 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
      * Depending on that it updates the surface to tiny tile on right side of screen or big tile
      * in center.
      */
-    Runnable mStatusChecker = new Runnable() {
+   /* Runnable mStatusChecker = new Runnable() {
         @Override
         public void run() {
             try {
@@ -171,7 +173,7 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
                 screenSizeHandler.postDelayed(mStatusChecker, 500);
             }
         }
-    };
+    };*/
 
     /**
      * When the surface is created, it will start recording the video in infinite loop.
@@ -212,8 +214,8 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
                     try {
                         Thread.sleep(20000);
                         stopRecording();
-                        screenSizeHandler.removeCallbacks(mStatusChecker);
-                        generateHash();
+                        //screenSizeHandler.removeCallbacks(mStatusChecker);
+                        orderAndSaveVideos();
                         windowManager.removeView(surfaceView);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
@@ -238,8 +240,8 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        windowManager.removeView(surfaceView);
-        screenSizeHandler.removeCallbacks(mStatusChecker);
+        //windowManager.removeView(surfaceView);
+        //screenSizeHandler.removeCallbacks(mStatusChecker);
     }
 
     @Nullable
@@ -297,15 +299,9 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
         camera.release();
     }
 
-    /**
-     * Executed only when a collision is detected.
-     * Order the videos in correct order.
-     * Get the video files in that order and move them to another location under a new directory.
-     * Create a byte array of video files and generate hash.
-     */
-    public void generateHash() {
+    public void orderAndSaveVideos() {
         int[] orderOfVideo = new int[3];
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
         if (accidentOnVideoIndex == 2) {
             orderOfVideo[0] = 1;
             orderOfVideo[1] = 2;
@@ -327,9 +323,8 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
                     FileOutputStream target = new FileOutputStream(dir.getPath() + "/" + (i + 1) + "accVideo" + orderOfVideo[i] + ".mp4");
                     InputStream fileIS = new FileInputStream(file);
                     fileIS.read(byteArray);
-
                     target.write(byteArray);
-                    outputStream.write(byteArray);
+
                     fileIS.close();
                     target.close();
                 } catch (IOException e) {
@@ -337,94 +332,20 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
                 }
             }
         }
-        byte[] finalByte = outputStream.toByteArray();
-        Log.i("Final Byte Array Length", "" + finalByte.length);
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            md.update(finalByte);
-            byte[] mdBytes = md.digest();
-            StringBuffer hexString = new StringBuffer();
-            for (int i = 0; i < mdBytes.length; i++) {
-                hexString.append(Integer.toHexString(0xFF & mdBytes[i]));
-            }
-            Log.i("Hex format : ", "" + hexString.toString());
 
-            //Create a hash.txt file
-            File hash = new File(dir.getPath() + "/hash.txt");
-            FileWriter writer = new FileWriter(hash);
-            writer.append(hexString.toString());
-            writer.flush();
-            writer.close();
-            outputStream.close();
-            sendHashToServer(hexString.toString());
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Intent postCollisionTasks = new Intent(getApplicationContext(), PostCollisionTasksService.class);
+        postCollisionTasks.putExtra("directoryPath", dir.getAbsolutePath());
+        postCollisionTasks.putExtra("accidentLocation", accidentLocation);
+        startService(postCollisionTasks);
+        stopSelf();
     }
-
-    /**
-     * Send the generated hash to Originstamp server
-     *
-     * @param hashString the hash to be submitted
-     */
-    public void sendHashToServer(String hashString) {
-        String url = getString(R.string.timestampUrl);
-        String postData = "{\"hash_sha256\" : \"" + hashString + "\"}";
-        try {
-            URL obj = new URL(url);
-            HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-            con.setRequestMethod("POST");
-            con.setRequestProperty("Content-Type", "application/json");
-            con.setRequestProperty("Authorization", "Token token=\""+getString(R.string.timestampToken)+"\"");
-            con.setRequestProperty("User-Agent", "Mozilla/5.0 ( compatible ) ");
-            con.setRequestProperty("Accept", "*/*");
-            DataOutputStream dos = new DataOutputStream(con.getOutputStream());
-            dos.writeBytes(postData);
-            dos.flush();
-            dos.close();
-            String line;
-            BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
-            while ((line = reader.readLine()) != null) {
-                System.out.println(line);
-            }
-            reader.close();
-
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(DashItApplication.getAppContext(), "Hash sent successfully!", Toast.LENGTH_LONG).show();
-                }
-            });
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(BackgroundService.this, "Problems while sending hash. Please check you internet connection.", Toast.LENGTH_LONG).show();
-                }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(BackgroundService.this, "Problems while sending hash. Please check you internet connection.", Toast.LENGTH_LONG).show();
-                }
-            });
-        }
-    }
-
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-
     }
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
-
     }
 
     /**
@@ -433,6 +354,7 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
     public static class CollisionBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
+            accidentLocation = (String) intent.getExtras().get("accidentLocation");
             accidentStatus = true;
         }
     }

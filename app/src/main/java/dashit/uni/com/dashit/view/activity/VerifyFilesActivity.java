@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
@@ -26,6 +27,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
 import dashit.uni.com.dashit.R;
+import dashit.uni.com.dashit.model.SHAHashTasks;
 
 /**
  * Activity that shows the visualization related to the History files.
@@ -48,6 +50,10 @@ public class VerifyFilesActivity extends AppCompatActivity {
     private RelativeLayout txLayout;
     private AppCompatButton verifyButton;
 
+    private String savedHash;
+    private String txHash;
+    private String accidentLocation;
+    private boolean hashCorrect;
     /**
      * Based on various category, which visualization to show
      * @param savedInstanceState super
@@ -96,8 +102,8 @@ public class VerifyFilesActivity extends AppCompatActivity {
         });
 
         ArrayList<String> fileNames = new ArrayList<>();
-        String name = this.getIntent().getExtras().getString("directory");
-        directoryName.setText(name);
+        String dName = this.getIntent().getExtras().getString("directory");
+        directoryName.setText(dName.substring(dName.lastIndexOf("/") + 1));
 
         String fileName1 = this.getIntent().getExtras().getString("file0");
         fileNames.add(fileName1);
@@ -118,10 +124,11 @@ public class VerifyFilesActivity extends AppCompatActivity {
             plus.setVisibility(View.VISIBLE);
         }
 
-        String savedHash = this.getIntent().getExtras().getString("savedHash");
-        boolean hashCorrect = verifyHash(fileNames, savedHash);
+        accidentLocation = this.getIntent().getExtras().getString("accidentLocation");
+        savedHash = this.getIntent().getExtras().getString("savedHash");
+        txHash = this.getIntent().getExtras().getString("tx_hash");
+        new CheckHashCorrect().execute(dName);
 
-        String txHash = this.getIntent().getExtras().getString("tx_hash");
         if(hashCorrect){
             hashValueView.setText(savedHash);
             downArrow.setVisibility(View.VISIBLE);
@@ -142,47 +149,16 @@ public class VerifyFilesActivity extends AppCompatActivity {
             hashValueView.setText(R.string.hashNotCorrect);
             hashValueView.setTextColor(Color.RED);
         }
+
     }
 
-    /**
-     * Verify if the newly calculated hash is same as the one stored
-     * @param fileNames The Filepath for all video files, in order
-     * @param savedHash the hash that is saved on the user's storage
-     * @return {boolean} If hash matches or not
-     */
-    public boolean verifyHash(ArrayList<String> fileNames, String savedHash){
-        boolean hashCheck = false;
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        for(String filePath : fileNames){
-            File file = new File(filePath);
-            if(file.exists()){
-                byte[] byteArray = new byte[(int) file.length()];
-                try {
-                    InputStream fileIS = new FileInputStream(file);
-                    fileIS.read(byteArray);
-                    outputStream.write(byteArray);
-                    fileIS.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+    public class CheckHashCorrect extends AsyncTask<String, Void, Void>{
+        @Override
+        protected Void doInBackground(String... strings) {
+            String calculatedHash = SHAHashTasks.generateHashFromFilesAndLocation(strings[0], accidentLocation);
+            if(calculatedHash.equalsIgnoreCase(savedHash))
+                hashCorrect = true;
+            return null;
         }
-        byte[] finalByte = outputStream.toByteArray();
-
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            md.update(finalByte);
-            byte[] mdBytes = md.digest();
-            StringBuffer hexString = new StringBuffer();
-            for (int i=0;i<mdBytes.length;i++) {
-                hexString.append(Integer.toHexString(0xFF & mdBytes[i]));
-            }
-            if(hexString.toString().equalsIgnoreCase(savedHash))
-                hashCheck = true;
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        return hashCheck;
     }
-
 }

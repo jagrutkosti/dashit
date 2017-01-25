@@ -104,6 +104,9 @@
         <service
             android:name=".service.LocationChangeService"
             android:exported="false" />
+        <service
+            android:name=".service.PostCollisionTasksService"
+            android:exported="false" />
 
         <receiver android:name=".service.BackgroundService$CollisionBroadcastReceiver">
             <intent-filter>

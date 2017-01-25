@@ -13,8 +13,10 @@ import android.widget.ListView;
 
 import org.apache.commons.io.FileUtils;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -59,6 +61,7 @@ public class HistoryVerifyActivity extends AppCompatActivity {
                 verifyActivity.putExtra("tx_hash", file.getTxHash());
                 verifyActivity.putExtra("seed", file.getSeed());
                 verifyActivity.putExtra("savedHash", file.getSavedHash());
+                verifyActivity.putExtra("accidentLocation", file.getAccidentLocation());
                 startActivity(verifyActivity);
             }
         });
@@ -83,7 +86,7 @@ public class HistoryVerifyActivity extends AppCompatActivity {
         switch(item.getItemId()) {
             case R.id.contextDelete:
                 HistoryFiles directory = (HistoryFiles) mListView.getItemAtPosition(info.position);
-                File directoryToDelete = new File(Environment.getExternalStorageDirectory().toString()+"/dashitHistory/" + directory.getDirectory());
+                File directoryToDelete = new File(directory.getDirectory());
                 try {
                     FileUtils.deleteDirectory(directoryToDelete);
                 } catch (IOException e) {
@@ -111,13 +114,30 @@ public class HistoryVerifyActivity extends AppCompatActivity {
 
             for (File dir : directories) {
                 HistoryFiles files = new HistoryFiles();
-                files.setDirectory(dir.getPath().substring(dir.getPath().lastIndexOf("/") + 1));
+                files.setDirectory(dir.getAbsolutePath());
+
                 List<String> fileNames = new ArrayList<>();
                 if(dir.isDirectory()){
                     File[] filesInDir = dir.listFiles();
                     Arrays.sort(filesInDir);
                     for(File f : filesInDir){
                         fileNames.add(f.getAbsolutePath());
+
+                        if(f.getAbsolutePath().endsWith("location.txt")){
+                            File locationFile = new File(f.getAbsolutePath());
+                            StringBuilder location = new StringBuilder();
+                            try{
+                                BufferedReader br = new BufferedReader(new FileReader(locationFile));
+                                String line;
+                                while((line = br.readLine()) != null){
+                                    location.append(line);
+                                }
+                                br.close();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            files.setAccidentLocation(location.toString());
+                        }
                     }
                 }
                 files.setFilesInDirectory(fileNames);
