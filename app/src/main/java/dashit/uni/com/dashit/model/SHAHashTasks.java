@@ -4,7 +4,6 @@ import android.util.Log;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -33,46 +32,31 @@ public class SHAHashTasks {
         if(directoryOfFiles.isDirectory()){
             File[] filesInDir = directoryOfFiles.listFiles();
             Arrays.sort(filesInDir);
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            for(File file : filesInDir){
-                if(file.exists() && !file.isDirectory() && file.getAbsolutePath().endsWith(".mp4")){
-                    //byte[] byteArray = new byte[(int) file.length()];
-                    try {
+            try {
+                MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
+                for(File file : filesInDir){
+                    if(file.exists() && !file.isDirectory() && file.getAbsolutePath().endsWith(".mp4")){
                         InputStream fileIS = new FileInputStream(file);
                         BufferedInputStream bufferedIS = new BufferedInputStream(fileIS);
                         byte buffer[] = new byte[1024];
                         int read;
                         while((read = bufferedIS.read(buffer)) != -1){
-                            outputStream.write(buffer, 0, read);
+                            messageDigest.update(buffer, 0, read);
                         }
-                        /*fileIS.read(byteArray);
-                        outputStream.write(byteArray);*/
                         fileIS.close();
                         bufferedIS.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
                     }
                 }
-            }
+                messageDigest.update(location.getBytes());
 
-            try {
-                outputStream.write(location.getBytes());
-                byte[] finalByte = outputStream.toByteArray();
-                Log.i("Final Byte Array Length", "" + finalByte.length);
-
-                MessageDigest md = MessageDigest.getInstance("SHA-256");
-                md.update(finalByte);
-                byte[] mdBytes = md.digest();
+                byte[] mdBytes = messageDigest.digest();
                 StringBuffer hexString = new StringBuffer();
-                for (int i = 0; i < mdBytes.length; i++) {
-                    hexString.append(Integer.toHexString(0xFF & mdBytes[i]));
+                for (byte mdByte : mdBytes) {
+                    hexString.append(Integer.toHexString(0xFF & mdByte));
                 }
                 Log.i("Hex format : ", "" + hexString.toString());
-                outputStream.close();
                 generateHashFromFileAndLocation = hexString.toString();
-            } catch (NoSuchAlgorithmException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
+            } catch (NoSuchAlgorithmException | IOException e) {
                 e.printStackTrace();
             }
         }

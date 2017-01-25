@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 
 import dashit.uni.com.dashit.DashItApplication;
 import dashit.uni.com.dashit.R;
@@ -34,6 +35,7 @@ import dashit.uni.com.dashit.model.SHAHashTasks;
 public class PostCollisionTasksService extends Service {
     private Handler handler;
     private String hashFromFilesAndLocation;
+    private String accidentLocation;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -41,7 +43,7 @@ public class PostCollisionTasksService extends Service {
 
         Bundle paramFromServiceInvocation = intent.getExtras();
         String directoryPath = (String) paramFromServiceInvocation.get("directoryPath");
-        String accidentLocation = (String) intent.getExtras().get("accidentLocation");
+        accidentLocation = (String) intent.getExtras().get("accidentLocation");
         hashFromFilesAndLocation = SHAHashTasks.generateHashFromFilesAndLocation(directoryPath, accidentLocation);
 
         if(hashFromFilesAndLocation != null && hashFromFilesAndLocation.length() > 0){
@@ -140,19 +142,24 @@ public class PostCollisionTasksService extends Service {
                 String myPhoneNumber = SP.getString("myPhoneNumber", "NA");
                 String emergencyContact = SP.getString("contact", "NA");
                 String location = "http://maps.google.com/?q=";
-                location += location;
+                location += accidentLocation;
                 String message = "Your contact: " + myName + "\n needs urgent help!" +
                         "\n Phone number: " + myPhoneNumber + "," +
-                        "\n Current location: " + location + "\n SHA-256 Hash: " + hashFromFilesAndLocation;
-
+                        "\n Current location: " + location;
+                String hashMessage = "SHA-256 Hash:" + hashFromFilesAndLocation;
                 System.out.println(message);
                 //Send SMS
                 if (emergencyContact.length() > 2 && !emergencyContact.equalsIgnoreCase("NA")) {
                     try {
                         SmsManager smsManager = SmsManager.getDefault();
                         smsManager.sendTextMessage(emergencyContact, null, message, null, null);
-                        Toast.makeText(DashItApplication.getAppContext(), "SMS Sent!",
-                                Toast.LENGTH_LONG).show();
+                        smsManager.sendTextMessage(emergencyContact, null, hashMessage, null, null);
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(DashItApplication.getAppContext(), "SMS Sent!", Toast.LENGTH_LONG).show();
+                            }
+                        });
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
