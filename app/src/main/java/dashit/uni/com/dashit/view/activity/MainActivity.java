@@ -52,9 +52,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     private static ImageView imgView;
 
-    private static double latToSend;
-    private static double longToSend;
-
     //Define a request code to send to Google Play services
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
     private GoogleApiClient googleApiClient;
@@ -152,9 +149,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             markerOptions.title("Current Location");
             markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
             currentLocationMarker = googleMap.addMarker(markerOptions);
-
-            latToSend = lastLocation.getLatitude();
-            longToSend = lastLocation.getLongitude();
         }
 
         locationRequest = new LocationRequest();
@@ -172,7 +166,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     /**
      * Change the position of marker on map when location is changed.
      */
-
     @Override
     public void onLocationChanged(Location location) {
         if(currentLocationMarker != null){
@@ -192,9 +185,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         googleMap.animateCamera(CameraUpdateFactory
                 .newCameraPosition(cameraPosition));
-
-        latToSend = location.getLatitude();
-        longToSend = location.getLongitude();
     }
 
     @Override

@@ -62,6 +62,9 @@ public class HistoryAdapter extends BaseAdapter {
         return position;
     }
 
+    /**
+     * For each item, set the data
+     */
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View rowView = inflator.inflate(R.layout.list_item, parent, false);
@@ -74,6 +77,7 @@ public class HistoryAdapter extends BaseAdapter {
         String directoryName = directory.getDirectory().substring(directory.getDirectory().lastIndexOf("/") + 1);
         textLabel.setText(directoryName);
 
+        //Set icon based on if hash been submitted or not
         if(directory.getTxHash() != null && directory.getTxHash().length() > 0)
             hashStatus.setImageResource(R.drawable.seed_submitted);
         else
@@ -105,7 +109,8 @@ public class HistoryAdapter extends BaseAdapter {
     }
 
     /**
-     * Asynchronously check if hash was submitted to Bitcoin Blockchain or not
+     * Asynchronously check if hash was submitted to Bitcoin Blockchain or not.
+     * If already submitted, extract the relevant data received from server and set it for VerifyActivity view.
      * Accordingly update the List view for 'History'
      */
     private class HashStatusCheck extends AsyncTask<String, String, String>{

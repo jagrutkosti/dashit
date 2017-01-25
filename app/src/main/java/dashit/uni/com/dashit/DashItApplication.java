@@ -5,7 +5,7 @@ import android.content.Context;
 
 /**
  * Created by Jagrut on 17-Apr-16.
- * To create application context and initiate a global ActivityLifeCycleCallBack
+ * To create application context which can be used from POJO and initiate a global ActivityLifeCycleCallBack
  */
 public class DashItApplication extends Application {
     private static Context context;

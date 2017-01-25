@@ -78,6 +78,7 @@ public class VerifyFilesActivity extends AppCompatActivity {
 
         Bundle extras = this.getIntent().getExtras();
 
+        //Copy the hash to check on originstamp server
         copyTxHash.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -88,6 +89,7 @@ public class VerifyFilesActivity extends AppCompatActivity {
             }
         });
 
+        //Redirect to BlockchainInfo for details about the transaction hash
         verifyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -97,6 +99,7 @@ public class VerifyFilesActivity extends AppCompatActivity {
             }
         });
 
+        //Start new intent to view videos
         final Uri firstFileUri = Uri.fromFile(new File(extras.getString("file0")));
         fileViewName1.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -157,11 +160,15 @@ public class VerifyFilesActivity extends AppCompatActivity {
         new CheckHashCorrect().execute(dName);
     }
 
+    /**
+     * Asynchronously check ff the saved hash has not be tampered with.
+     * Accordingly, show the visualization items.
+     */
     public class CheckHashCorrect extends AsyncTask<String, Void, Void>{
         @Override
         protected Void doInBackground(String... strings) {
             String calculatedHash = SHAHashTasks.generateHashFromFilesAndLocation(strings[0], accidentLocation);
-            if(calculatedHash.equalsIgnoreCase(savedHash))
+            if(calculatedHash.equals(savedHash))
                 hashCorrect = true;
             return null;
         }

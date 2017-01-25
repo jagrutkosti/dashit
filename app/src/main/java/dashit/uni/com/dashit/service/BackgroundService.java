@@ -12,7 +12,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.hardware.Camera;
-import android.location.Location;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
 import android.os.Environment;
@@ -21,32 +20,19 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.WindowManager;
 import android.widget.Toast;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 
-import dashit.uni.com.dashit.ActivityLifeCycleHandler;
-import dashit.uni.com.dashit.DashItApplication;
 import dashit.uni.com.dashit.R;
 import dashit.uni.com.dashit.view.activity.MainActivity;
 
@@ -61,7 +47,6 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
     boolean manualStopStatus = false;
     int accidentOnVideoIndex = 0;
     Handler handler;
-    Handler screenSizeHandler;
     static String accidentLocation;
 
     private WindowManager windowManager;
@@ -74,7 +59,6 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
     int height = 0;
     int width = 0;
 
-
     /**
      * Create a surface to hold the camera preview. This surface rests above all surface.
      * Create Notification to let the user know anytime that the application is running.
@@ -82,9 +66,7 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
     @Override
     public void onCreate() {
         super.onCreate();
-
         handler = new Handler();
-        screenSizeHandler = new Handler();
 
         if (isExternalStorageWritable()) {
             for (int i = 1; i < 4; i++) {
@@ -115,11 +97,9 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
         notification.flags = Notification.FLAG_AUTO_CANCEL | Notification.FLAG_ONGOING_EVENT;
         startForeground(Integer.MAX_VALUE, notification);
 
-        // Create new SurfaceView, set its size to 50x50, move it to the top left corner and set this service as a callback
+        // Create new SurfaceView, set its size to 50x50, move it to the top right corner and set this service as a callback
         windowManager = (WindowManager) this.getSystemService(Context.WINDOW_SERVICE);
-
         surfaceView = new SurfaceView(this);
-
         DisplayMetrics displaymetrics = new DisplayMetrics();
         windowManager.getDefaultDisplay().getMetrics(displaymetrics);
         height = displaymetrics.heightPixels;
@@ -131,49 +111,10 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
                 WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
                 PixelFormat.TRANSLUCENT
         );
-        layoutParams.gravity = Gravity.TOP | Gravity.RIGHT;
+        layoutParams.gravity = Gravity.TOP | Gravity.END;
         windowManager.addView(surfaceView, layoutParams);
         surfaceView.getHolder().addCallback(this);
-
-        //mStatusChecker.run();
     }
-
-
-    /**
-     * A thread which checks if any activity is in foreground or not.
-     * Depending on that it updates the surface to tiny tile on right side of screen or big tile
-     * in center.
-     */
-   /* Runnable mStatusChecker = new Runnable() {
-        @Override
-        public void run() {
-            try {
-                if (ActivityLifeCycleHandler.isApplicationVisible() || ActivityLifeCycleHandler.isApplicationInForeground()) {
-                    // is in foreground
-                   WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(
-                            width, height - 500,
-                            WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY,
-                            WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
-                            PixelFormat.TRANSLUCENT
-                    );
-                    windowManager.updateViewLayout(surfaceView, layoutParams);
-
-                } else {
-                    WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(
-                            50, 50,
-                            WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY,
-                            WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
-                            PixelFormat.TRANSLUCENT
-                    );
-                    layoutParams.gravity = Gravity.TOP | Gravity.RIGHT;
-                    windowManager.updateViewLayout(surfaceView, layoutParams);
-                }
-            } finally {
-
-                screenSizeHandler.postDelayed(mStatusChecker, 500);
-            }
-        }
-    };*/
 
     /**
      * When the surface is created, it will start recording the video in infinite loop.
@@ -214,7 +155,6 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
                     try {
                         Thread.sleep(20000);
                         stopRecording();
-                        //screenSizeHandler.removeCallbacks(mStatusChecker);
                         orderAndSaveVideos();
                         windowManager.removeView(surfaceView);
                     } catch (InterruptedException e) {
@@ -240,8 +180,6 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        //windowManager.removeView(surfaceView);
-        //screenSizeHandler.removeCallbacks(mStatusChecker);
     }
 
     @Nullable
@@ -261,7 +199,6 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
 
     /**
      * Start recording the video
-     *
      * @param fileName store the following video recording under this name
      */
     public void startRecording(String fileName) {
@@ -282,6 +219,7 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
         try {
             mediaRecorder.prepare();
         } catch (Exception e) {
+            e.printStackTrace();
         }
         mediaRecorder.start();
     }
@@ -299,6 +237,10 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
         camera.release();
     }
 
+    /**
+     * When received a confirmation of collision, order the videos in correct order and save them.
+     * Initiate PostCollisionTasksService to handle further tasks.
+     */
     public void orderAndSaveVideos() {
         int[] orderOfVideo = new int[3];
 
@@ -333,6 +275,7 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
             }
         }
 
+        //Initate PostCollisionTasksService to handle other tasks.
         Intent postCollisionTasks = new Intent(getApplicationContext(), PostCollisionTasksService.class);
         postCollisionTasks.putExtra("directoryPath", dir.getAbsolutePath());
         postCollisionTasks.putExtra("accidentLocation", accidentLocation);
