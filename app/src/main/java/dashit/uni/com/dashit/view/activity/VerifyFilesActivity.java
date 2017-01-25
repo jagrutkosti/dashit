@@ -17,13 +17,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
 import dashit.uni.com.dashit.R;
@@ -82,6 +76,8 @@ public class VerifyFilesActivity extends AppCompatActivity {
         copyTxHash = (Button) findViewById(R.id.button);
         verifyButton = (AppCompatButton) findViewById(R.id.verifyButton);
 
+        Bundle extras = this.getIntent().getExtras();
+
         copyTxHash.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -101,22 +97,53 @@ public class VerifyFilesActivity extends AppCompatActivity {
             }
         });
 
+        final Uri firstFileUri = Uri.fromFile(new File(extras.getString("file0")));
+        fileViewName1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent startVideoIntent = new Intent(Intent.ACTION_VIEW);
+                startVideoIntent.setDataAndType(firstFileUri, "video/*");
+                startActivity(startVideoIntent);
+            }
+        });
+
+        final Uri secondFileUri = Uri.fromFile(new File(extras.getString("file1")));
+        fileViewName2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent startVideoIntent = new Intent(Intent.ACTION_VIEW);
+                startVideoIntent.setDataAndType(secondFileUri, "video/*");
+                startActivity(startVideoIntent);
+            }
+        });
+        
         ArrayList<String> fileNames = new ArrayList<>();
-        String dName = this.getIntent().getExtras().getString("directory");
+        String dName = extras.getString("directory");
         directoryName.setText(dName.substring(dName.lastIndexOf("/") + 1));
 
-        String fileName1 = this.getIntent().getExtras().getString("file0");
+        String fileName1 = extras.getString("file0");
         fileNames.add(fileName1);
         fileName1 = fileName1.substring(fileName1.lastIndexOf("/") + 1);
         fileViewName1.setText(fileName1);
 
-        String fileName2 = this.getIntent().getExtras().getString("file1");
+
+        String fileName2 = extras.getString("file1");
         fileNames.add(fileName2);
         fileName2 = fileName2.substring(fileName2.lastIndexOf("/") + 1);
         fileViewName2.setText(fileName2);
 
-        String fileName3 = this.getIntent().getExtras().getString("file2");
+        String fileName3 = extras.getString("file2");
         if(fileName3 != null && fileName3.length() > 0){
+            final Uri thirdFileUri = Uri.fromFile(new File(fileName3));
+            fileViewName3.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent startVideoIntent = new Intent(Intent.ACTION_VIEW);
+                    startVideoIntent.setDataAndType(thirdFileUri, "video/*");
+                    startActivity(startVideoIntent);
+                }
+            });
+
             fileNames.add(fileName3);
             fileName3 = fileName3.substring(fileName3.lastIndexOf("/") + 1);
             fileViewName3.setText(fileName3);
@@ -124,9 +151,9 @@ public class VerifyFilesActivity extends AppCompatActivity {
             plus.setVisibility(View.VISIBLE);
         }
 
-        accidentLocation = this.getIntent().getExtras().getString("accidentLocation");
-        savedHash = this.getIntent().getExtras().getString("savedHash");
-        txHash = this.getIntent().getExtras().getString("tx_hash");
+        accidentLocation = extras.getString("accidentLocation");
+        savedHash = extras.getString("savedHash");
+        txHash = extras.getString("tx_hash");
         new CheckHashCorrect().execute(dName);
     }
 
