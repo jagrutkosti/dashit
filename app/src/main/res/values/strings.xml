@@ -11,6 +11,7 @@
     <string name="home_placeholder">Please keep the phone on Dash Cam Holder</string>
     <string name="status">Status</string>
     <string name="status_description">Your current driving status that is measured by the sensors.</string>
+    <string name="long_press_message">Long press an item to delete</string>
     <string name="safe">Safe</string>
     <string name="stop">Stop</string>
     <string name="collision">Collision!</string>

@@ -10,10 +10,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.CountDownTimer;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -72,13 +75,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         imgView = (ImageView) findViewById(R.id.status);
 
-        Intent intent2 = new Intent(MainActivity.this, SensorService.class);
-        intent2.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startService(intent2);
+        Intent sensorIntent = new Intent(MainActivity.this, SensorService.class);
+        sensorIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startService(sensorIntent);
 
-        Intent intent = new Intent(MainActivity.this, BackgroundService.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startService(intent);
+        Intent backgroundIntent = new Intent(MainActivity.this, BackgroundService.class);
+        backgroundIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startService(backgroundIntent);
 
         FloatingActionButton btnStop = (FloatingActionButton) findViewById(R.id.fab_stop);
         btnStop.setOnClickListener(new View.OnClickListener() {
@@ -88,7 +91,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 System.exit(0);
             }
         });
-
+        registerReceiver(collisionBroadcastReceiver, new IntentFilter("COLLISION_DETECTED"));
         Snackbar.make(findViewById(android.R.id.content), "You can switch application", Snackbar.LENGTH_LONG).show();
 
         // Create the LocationRequest object
@@ -99,6 +102,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(collisionBroadcastReceiver);
     }
 
     @Override
@@ -183,7 +192,110 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
     }
 
-    static int smsCount = 0;
+    BroadcastReceiver collisionBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            System.out.println("Confirm Collision. Wake Screen");
+
+            AlertDialog.Builder confirmDialogBuilder = new AlertDialog.Builder(MainActivity.this);
+            confirmDialogBuilder.setMessage("Was this a collision?");
+            confirmDialogBuilder.setCancelable(true);
+            confirmDialogBuilder.setTitle("Please confirm:");
+
+            confirmDialogBuilder.setPositiveButton(
+                    "Yes",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            sendMessage();
+                            Intent intent = new Intent();
+                            intent.setAction("com.collisionConfirmed.Broadcast");
+                            intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
+                            sendBroadcast(intent);
+                            dialog.cancel();
+                        }
+                    });
+
+            confirmDialogBuilder.setNegativeButton(
+                    "No",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            imgView.setImageResource(R.drawable.green_dot);
+                            dialog.cancel();
+                        }
+                    });
+            confirmDialogBuilder.setOnDismissListener(new DialogInterface.OnDismissListener(){
+                @Override
+                public void onDismiss(DialogInterface dialogInterface) {
+                    System.out.println("Ohh seriously");
+                    System.out.println("Listened");
+                    sendMessage();
+                    Intent intent = new Intent();
+                    intent.setAction("com.collisionConfirmed.Broadcast");
+                    intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
+                    sendBroadcast(intent);
+                }
+            });
+            final AlertDialog confirmDialog = confirmDialogBuilder.create();
+            confirmDialog.setCanceledOnTouchOutside(false);
+            confirmDialog.setCancelable(false);
+            confirmDialog.show();
+
+            new CountDownTimer(5000, 0){
+                @Override
+                public void onTick(long l) {
+                }
+                @Override
+                public void onFinish() {
+                    System.out.println("Inside at least");
+                    if(confirmDialog.isShowing()){
+                        confirmDialog.dismiss();
+                        System.out.println("Not so much inside");
+                    }
+                }
+            };
+
+            confirmDialog.setOnDismissListener(new DialogInterface.OnDismissListener(){
+                @Override
+                public void onDismiss(DialogInterface dialogInterface) {
+                    System.out.println("Listened");
+                    sendMessage();
+                    Intent intent = new Intent();
+                    intent.setAction("com.collisionConfirmed.Broadcast");
+                    intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
+                    sendBroadcast(intent);
+                }
+            });
+        }
+    };
+
+    public void sendMessage() {
+        //Get data from preferences
+        SharedPreferences SP = PreferenceManager.getDefaultSharedPreferences(DashItApplication.getAppContext());
+        if (SP.getBoolean("sendSms", false)) {
+            String myName = SP.getString("myName", "NA");
+            String myPhoneNumber = SP.getString("myPhoneNumber", "NA");
+            String emergencyContact = SP.getString("contact", "NA");
+            String location = "http://maps.google.com/?q=";
+            location += latToSend + "," + longToSend;
+            String message = "Your contact: " + myName + "\n needs urgent help!" +
+                    "\n Phone number: " + myPhoneNumber + "," +
+                    "\n Current location: " + location;
+
+            System.out.println(message);
+            //Send SMS
+            if (emergencyContact.length() > 2 && !emergencyContact.equalsIgnoreCase("NA")) {
+                try {
+                    SmsManager smsManager = SmsManager.getDefault();
+                    smsManager.sendTextMessage(emergencyContact, null, message, null, null);
+                    Toast.makeText(DashItApplication.getAppContext(), "SMS Sent!",
+                            Toast.LENGTH_LONG).show();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+    //static int smsCount = 0;
 
     /**
      * Steps to take in case a collision is detected, notified from SensorService.
@@ -194,38 +306,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         @Override
         public void onReceive(Context context, Intent intent) {
             imgView.setImageResource(R.drawable.carcollision);
-            if (smsCount == 0) {
+            /*if (smsCount == 0) {
                 sendMessage();
                 smsCount++;
-            }
+            }*/
+            context.sendBroadcast(new Intent("COLLISION_DETECTED"));
         }
 
-        public void sendMessage() {
-            //Get data from preferences
-            SharedPreferences SP = PreferenceManager.getDefaultSharedPreferences(DashItApplication.getAppContext());
-            if (SP.getBoolean("sendSms", false)) {
-                String myName = SP.getString("myName", "NA");
-                String myPhoneNumber = SP.getString("myPhoneNumber", "NA");
-                String emergencyContact = SP.getString("contact", "NA");
-                String location = "http://maps.google.com/?q=";
-                location += latToSend + "," + longToSend;
-                String message = "Your contact: " + myName + "\n needs urgent help!" +
-                        "\n Phone number: " + myPhoneNumber + "," +
-                        "\n Current location: " + location;
 
-                System.out.println(message);
-                //Send SMS
-                if (emergencyContact.length() > 2 && !emergencyContact.equalsIgnoreCase("NA")) {
-                    try {
-                        SmsManager smsManager = SmsManager.getDefault();
-                        smsManager.sendTextMessage(emergencyContact, null, message, null, null);
-                        Toast.makeText(DashItApplication.getAppContext(), "SMS Sent!",
-                                Toast.LENGTH_LONG).show();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
     }
 }

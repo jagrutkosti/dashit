@@ -8,7 +8,19 @@
         android:layout_height="match_parent"
         android:layout_width="match_parent"
         android:divider="@color/common_google_signin_btn_text_dark_disabled"
-        android:dividerHeight="1dp">
+        android:dividerHeight="1dp"
+        android:layout_marginBottom="20dp">
     </ListView>
+
+    <TextView
+        android:text="@string/long_press_message"
+        android:layout_width="match_parent"
+        android:id="@+id/longPressMsg"
+        android:layout_alignParentBottom="true"
+        android:textAppearance="@style/TextAppearance.AppCompat"
+        android:textSize="16sp"
+        android:layout_height="20dp"
+        android:gravity="center_horizontal"
+        android:textColor="?attr/colorPrimary" />
 
 </RelativeLayout>

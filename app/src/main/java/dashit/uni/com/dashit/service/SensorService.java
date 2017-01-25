@@ -37,10 +37,10 @@ public class SensorService extends IntentService implements SensorEventListener 
             lastUpdate = curTime;
 
             if(Math.abs(x-last_x) > 8 || Math.abs(y-last_y) > 8 || Math.abs(z-last_z) > 8){
-                Intent intent = new Intent();
-                intent.setAction("com.collision.Broadcast");
-                intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
-                sendBroadcast(intent);
+                System.out.println("Sensor Collision");
+                Intent locationIntent = new Intent(getApplicationContext(), LocationChangeService.class);
+                locationIntent.setAction("start_location_tracing");
+                startService(locationIntent);
             }
 
             last_x = x;
