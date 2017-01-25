@@ -128,28 +128,6 @@ public class VerifyFilesActivity extends AppCompatActivity {
         savedHash = this.getIntent().getExtras().getString("savedHash");
         txHash = this.getIntent().getExtras().getString("tx_hash");
         new CheckHashCorrect().execute(dName);
-
-        if(hashCorrect){
-            hashValueView.setText(savedHash);
-            downArrow.setVisibility(View.VISIBLE);
-            bitcoin.setVisibility(View.VISIBLE);
-            hashSubmissionView.setVisibility(View.VISIBLE);
-            if(txHash != null && txHash.length() > 0){
-                hashSubmissionView.setText(R.string.hashSubmission);
-                txLayout.setVisibility(View.VISIBLE);
-                txArrow.setVisibility(View.VISIBLE);
-                txHeading.setVisibility(View.VISIBLE);
-                txText.setText(txHash);
-                verifyButton.setVisibility(View.VISIBLE);
-            }else{
-                hashSubmissionView.setText(R.string.hashNoSubmission);
-                hashSubmissionView.setTextColor(Color.RED);
-            }
-        }else{
-            hashValueView.setText(R.string.hashNotCorrect);
-            hashValueView.setTextColor(Color.RED);
-        }
-
     }
 
     public class CheckHashCorrect extends AsyncTask<String, Void, Void>{
@@ -159,6 +137,31 @@ public class VerifyFilesActivity extends AppCompatActivity {
             if(calculatedHash.equalsIgnoreCase(savedHash))
                 hashCorrect = true;
             return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            if(hashCorrect){
+                hashValueView.setText(savedHash);
+                downArrow.setVisibility(View.VISIBLE);
+                bitcoin.setVisibility(View.VISIBLE);
+                hashSubmissionView.setVisibility(View.VISIBLE);
+                if(txHash != null && txHash.length() > 0){
+                    hashSubmissionView.setText(R.string.hashSubmission);
+                    txLayout.setVisibility(View.VISIBLE);
+                    txArrow.setVisibility(View.VISIBLE);
+                    txHeading.setVisibility(View.VISIBLE);
+                    txText.setText(txHash);
+                    verifyButton.setVisibility(View.VISIBLE);
+                }else{
+                    hashSubmissionView.setText(R.string.hashNoSubmission);
+                    hashSubmissionView.setTextColor(Color.RED);
+                }
+            }else{
+                hashValueView.setText(R.string.hashNotCorrect);
+                hashValueView.setTextColor(Color.RED);
+            }
         }
     }
 }
