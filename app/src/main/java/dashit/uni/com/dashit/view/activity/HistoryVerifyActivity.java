@@ -26,7 +26,9 @@ import dashit.uni.com.dashit.view.adapter.HistoryAdapter;
 
 /**
  * Created by Jagrut on 29-Nov-16.
- * The Activity which is shown after the user taps on 'History' from Menu item
+ * The Activity which is shown after the user taps on 'History' from Menu item.
+ * It contains a list view of directories that have recorded collisions in the past.
+ * The directory includes the video files, hash and if available, data from the server.
  */
 
 public class HistoryVerifyActivity extends AppCompatActivity {
@@ -70,6 +72,11 @@ public class HistoryVerifyActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * If the user selects delete from context menu, then delete the directory.
+     * @param item The selected item in the list view
+     * @return {boolean} if any action was performed or not
+     */
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
@@ -90,7 +97,7 @@ public class HistoryVerifyActivity extends AppCompatActivity {
         }
     }
     /**
-     * Populating the list view using the HistoryAdapter
+     * Populating the list view with directory names using the HistoryAdapter as Data source
      */
     public void populateView(){
         File rootDirectory = new File(Environment.getExternalStorageDirectory().toString()+"/dashitHistory/");

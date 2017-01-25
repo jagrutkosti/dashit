@@ -12,7 +12,8 @@ import android.support.annotation.Nullable;
 
 /**
  * Created by Jagrut on 13-Feb-16.
- * Service to check for collision. Utilized Accelerometer of the smart-phone
+ * Service to check for collision. Utilized Accelerometer of the smart-phone to detect change in
+ * any axial acceleration of the device and invoke the LocationChangeService to confirm collision.
  */
 public class SensorService extends IntentService implements SensorEventListener {
 
@@ -36,8 +37,8 @@ public class SensorService extends IntentService implements SensorEventListener 
         if ((curTime - lastUpdate) > 100) {
             lastUpdate = curTime;
 
+            //Check for axial acceleration changes and invoke LocationChangeService
             if(Math.abs(x-last_x) > 8 || Math.abs(y-last_y) > 8 || Math.abs(z-last_z) > 8){
-                System.out.println("Sensor Collision");
                 Intent locationIntent = new Intent(getApplicationContext(), LocationChangeService.class);
                 locationIntent.setAction("start_location_tracing");
                 startService(locationIntent);

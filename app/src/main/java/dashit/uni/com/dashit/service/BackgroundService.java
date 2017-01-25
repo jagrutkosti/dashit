@@ -193,7 +193,7 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
                             accidentOnVideoIndex = i;
                             startRecording("dashit" + i);
                             try {
-                                Thread.sleep(10000);
+                                Thread.sleep(20000);
                                 if (recordingStatus)
                                     stopRecording();
 
@@ -210,7 +210,7 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
 
                     startRecording("dashit3");
                     try {
-                        Thread.sleep(10000);
+                        Thread.sleep(20000);
                         stopRecording();
                         screenSizeHandler.removeCallbacks(mStatusChecker);
                         generateHash();

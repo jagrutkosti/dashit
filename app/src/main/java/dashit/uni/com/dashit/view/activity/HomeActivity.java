@@ -2,12 +2,9 @@ package dashit.uni.com.dashit.view.activity;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
-import android.os.Handler;
-import android.os.ResultReceiver;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -16,9 +13,6 @@ import android.view.MenuItem;
 
 import android.view.View;
 import android.widget.ImageButton;
-import android.widget.TextView;
-import android.widget.Toast;
-
 import dashit.uni.com.dashit.R;
 
 /**
@@ -32,6 +26,7 @@ public class HomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
+        //Star the MainActivity that is responsible for the main application logic
         ImageButton btnStart = (ImageButton) findViewById(R.id.start);
         btnStart.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -40,6 +35,7 @@ public class HomeActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+        //Check for internet availability
         new CheckNetworkStatus().execute();
     }
 

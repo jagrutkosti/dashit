@@ -1,11 +1,5 @@
 package dashit.uni.com.dashit.view.activity;
 
-/**
- * Created by Jagrut on 23-Jan-16.
- * The Video Recording Activity. All monitoring services are triggered from this activity.
- * View after the user hits 'Record' icon.
- */
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -15,7 +9,6 @@ import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
@@ -48,7 +41,11 @@ import dashit.uni.com.dashit.R;
 import dashit.uni.com.dashit.service.BackgroundService;
 import dashit.uni.com.dashit.service.SensorService;
 
-
+/**
+ * Created by Jagrut on 23-Jan-16.
+ * The Video Recording Activity. All monitoring services are triggered from this activity.
+ * View after the user hits 'Record' icon.
+ */
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, OnMapReadyCallback,
         LocationListener {
@@ -75,10 +72,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         imgView = (ImageView) findViewById(R.id.status);
 
+        //Start the accelerometer monitoring
         Intent sensorIntent = new Intent(MainActivity.this, SensorService.class);
         sensorIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startService(sensorIntent);
 
+        //Start video recording in background
         Intent backgroundIntent = new Intent(MainActivity.this, BackgroundService.class);
         backgroundIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startService(backgroundIntent);
@@ -100,6 +99,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 .setInterval(10 * 1000)
                 .setFastestInterval(1000);
 
+        //Create Map Fragment to display Google Maps
         mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
     }
@@ -110,6 +110,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         unregisterReceiver(collisionBroadcastReceiver);
     }
 
+    /**
+     * Connect to LocationService to get the location
+     */
     @Override
     public void onMapReady(GoogleMap gMap) {
         googleMap = gMap;
@@ -126,6 +129,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 .build();
     }
 
+    /**
+     * Set up map with current location
+     */
     @Override
     public void onConnected(Bundle bundle) {
         Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
@@ -154,6 +160,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public void onConnectionSuspended(int i) {
 
     }
+
+    /**
+     * Change the position of marker on map when location is changed.
+     */
 
     @Override
     public void onLocationChanged(Location location) {
@@ -192,19 +202,23 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
     }
 
+    /**
+     * Ask for user confirmation when collision is detected using accelerometer and location change services.
+     * Accordingly, trigger the appropriate tasks.
+     * If no user input received within 10 seconds, trigger a confirmation of collision and respective tasks.
+     */
     BroadcastReceiver collisionBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            System.out.println("Confirm Collision. Wake Screen");
-
             AlertDialog.Builder confirmDialogBuilder = new AlertDialog.Builder(MainActivity.this);
             confirmDialogBuilder.setMessage("Was this a collision?");
-            confirmDialogBuilder.setCancelable(true);
-            confirmDialogBuilder.setTitle("Please confirm:");
+            confirmDialogBuilder.setCancelable(false);
+            confirmDialogBuilder.setTitle("Please confirm");
 
             confirmDialogBuilder.setPositiveButton(
                     "Yes",
                     new DialogInterface.OnClickListener() {
+                        //Confirm collision and then notify BackgroundService of the same
                         public void onClick(DialogInterface dialog, int id) {
                             sendMessage();
                             Intent intent = new Intent();
@@ -218,56 +232,42 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             confirmDialogBuilder.setNegativeButton(
                     "No",
                     new DialogInterface.OnClickListener() {
+                        //False Positive
                         public void onClick(DialogInterface dialog, int id) {
                             imgView.setImageResource(R.drawable.green_dot);
                             dialog.cancel();
                         }
                     });
-            confirmDialogBuilder.setOnDismissListener(new DialogInterface.OnDismissListener(){
-                @Override
-                public void onDismiss(DialogInterface dialogInterface) {
-                    System.out.println("Ohh seriously");
-                    System.out.println("Listened");
-                    sendMessage();
-                    Intent intent = new Intent();
-                    intent.setAction("com.collisionConfirmed.Broadcast");
-                    intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
-                    sendBroadcast(intent);
-                }
-            });
+
             final AlertDialog confirmDialog = confirmDialogBuilder.create();
             confirmDialog.setCanceledOnTouchOutside(false);
             confirmDialog.setCancelable(false);
             confirmDialog.show();
 
-            new CountDownTimer(5000, 0){
+            final Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
                 @Override
-                public void onTick(long l) {
-                }
-                @Override
-                public void onFinish() {
-                    System.out.println("Inside at least");
+                public void run() {
                     if(confirmDialog.isShowing()){
-                        confirmDialog.dismiss();
-                        System.out.println("Not so much inside");
+                        //No User Input. Confirm Collision Automatically.
+                        confirmDialog.cancel();
+                        sendMessage();
+                        Intent intent = new Intent();
+                        intent.setAction("com.collisionConfirmed.Broadcast");
+                        intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
+                        sendBroadcast(intent);
                     }
-                }
-            };
 
-            confirmDialog.setOnDismissListener(new DialogInterface.OnDismissListener(){
-                @Override
-                public void onDismiss(DialogInterface dialogInterface) {
-                    System.out.println("Listened");
-                    sendMessage();
-                    Intent intent = new Intent();
-                    intent.setAction("com.collisionConfirmed.Broadcast");
-                    intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
-                    sendBroadcast(intent);
                 }
-            });
+            }, 10 * 1000);
+
         }
     };
 
+    /**
+     * Send message to emergency contact f the user has chosen to do so in SettingsActivity
+     * Data sent: App User's Name, Phone Number and Accident Location
+     */
     public void sendMessage() {
         //Get data from preferences
         SharedPreferences SP = PreferenceManager.getDefaultSharedPreferences(DashItApplication.getAppContext());
@@ -295,21 +295,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             }
         }
     }
-    //static int smsCount = 0;
 
     /**
-     * Steps to take in case a collision is detected, notified from SensorService.
-     * Send an SMS containing collision location, if the user has selected for it.
+     * Steps to take in case a collision is detected, notified from LocationChangeService.
      */
     public static class CollisionBroadcastReceiver extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context context, Intent intent) {
             imgView.setImageResource(R.drawable.carcollision);
-            /*if (smsCount == 0) {
-                sendMessage();
-                smsCount++;
-            }*/
             context.sendBroadcast(new Intent("COLLISION_DETECTED"));
         }
 

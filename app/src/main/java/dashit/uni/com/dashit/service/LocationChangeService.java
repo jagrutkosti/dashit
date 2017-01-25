@@ -25,6 +25,9 @@ public class LocationChangeService extends Service implements GoogleApiClient.Co
     private GoogleApiClient googleApiClient;
     private Location currentLocation;
 
+    /**
+     * Connect to LocationService to get the current location of the device.
+     */
     @Override
     public void onCreate() {
         super.onCreate();
@@ -52,7 +55,7 @@ public class LocationChangeService extends Service implements GoogleApiClient.Co
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        System.out.println("Location Check");
+        //Perform the waiting task in asynchronous mode
         new WaitForLocationCheck().execute();
         stopSelf();
     }
@@ -67,18 +70,21 @@ public class LocationChangeService extends Service implements GoogleApiClient.Co
 
     }
 
+    /**
+     * Asynchronously wait for 10 seconds and again get the location to check if it has changed.
+     */
     public class WaitForLocationCheck extends AsyncTask<Void, Void, Void>{
-
         @Override
         protected Void doInBackground(Void... voids) {
             Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
             if(lastLocation != null){
                 currentLocation = lastLocation;
                 try {
+                    //Wait for 10 seconds and again get the location and consecutively, distance
                     Thread.sleep(10000);
                     float distanceInMeters = lastLocation.distanceTo(currentLocation);
 
-                    if(distanceInMeters > 50.00){
+                    if(distanceInMeters < 50.00){
                         Intent intent = new Intent();
                         intent.setAction("com.collisionDetected.Broadcast");
                         intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
