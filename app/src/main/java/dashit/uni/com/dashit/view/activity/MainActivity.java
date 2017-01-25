@@ -110,6 +110,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         unregisterReceiver(collisionBroadcastReceiver);
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        stopService(new Intent(MainActivity.this, BackgroundService.class));
+        stopService(new Intent(MainActivity.this, SensorService.class));
+        System.exit(0);
+    }
+
     /**
      * Connect to LocationService to get the location
      */
