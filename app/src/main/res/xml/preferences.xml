@@ -4,20 +4,23 @@
         android:title="Send SMS"
         android:key="sendSms" />
     <EditTextPreference
-        android:title="Your Name"
+        android:title="Name"
         android:key="myName"
         android:maxLength="25"
-        android:summary="Please enter your name"/>
+        android:dialogMessage="Max length: 25"
+        android:summary="%s"/>
     <EditTextPreference
-        android:title="Your Phone Number"
+        android:title="Phone Number"
         android:key="myPhoneNumber"
         android:inputType="phone"
         android:maxLength="15"
-        android:summary="Please enter your phone number with country code" />
+        android:dialogMessage="Please add county code. Max length: 15"
+        android:summary="%s" />
     <EditTextPreference
         android:title="Emergency Contact"
         android:key="contact"
         android:inputType="phone"
         android:maxLength="15"
-        android:summary="Please enter your emergency contact with country code" />
+        android:dialogMessage="Please add county code. Max length: 15"
+        android:summary="%s" />
 </PreferenceScreen>
