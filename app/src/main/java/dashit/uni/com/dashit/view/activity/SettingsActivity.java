@@ -51,28 +51,32 @@ public class SettingsActivity extends AppCompatActivity {
 
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-            EditTextPreference textPref = (EditTextPreference) findPreference(key);
-            String title = (String) textPref.getTitle();
-            switch(title){
-                case "Name":
-                    if(textPref.getText() != null)
-                        textPref.setSummary("Your name: " + textPref.getText());
-                    else
-                        textPref.setSummary("Your name: Not set");
-                    break;
-                case "Phone Number":
-                    if(textPref.getText() != null)
-                        textPref.setSummary("Your phone number: " + textPref.getText());
-                    else
-                        textPref.setSummary("Your phone number: Not set");
-                    break;
-                case "Emergency Contact":
-                    if(textPref.getText() != null)
-                        textPref.setSummary("Your emergency contact: " + textPref.getText());
-                    else
-                        textPref.setSummary("Your emergency contact: Not set");
-                    break;
+            Preference changedPreference = findPreference(key);
+            if(changedPreference instanceof  EditTextPreference){
+                EditTextPreference textPref = (EditTextPreference) findPreference(key);
+                String title = (String) textPref.getTitle();
+                switch(title){
+                    case "Name":
+                        if(textPref.getText() != null)
+                            textPref.setSummary("Your name: " + textPref.getText());
+                        else
+                            textPref.setSummary("Your name: Not set");
+                        break;
+                    case "Phone Number":
+                        if(textPref.getText() != null)
+                            textPref.setSummary("Your phone number: " + textPref.getText());
+                        else
+                            textPref.setSummary("Your phone number: Not set");
+                        break;
+                    case "Emergency Contact":
+                        if(textPref.getText() != null)
+                            textPref.setSummary("Your emergency contact: " + textPref.getText());
+                        else
+                            textPref.setSummary("Your emergency contact: Not set");
+                        break;
+                }
             }
+
         }
     }
 }
