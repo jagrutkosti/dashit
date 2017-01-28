@@ -20,6 +20,7 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -102,11 +103,11 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
         surfaceView = new SurfaceView(this);
         DisplayMetrics displaymetrics = new DisplayMetrics();
         windowManager.getDefaultDisplay().getMetrics(displaymetrics);
-        height = displaymetrics.heightPixels;
-        width = displaymetrics.widthPixels;
+        height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, displaymetrics.heightPixels, getResources().getDisplayMetrics());
+        width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, displaymetrics.widthPixels, getResources().getDisplayMetrics());
 
         WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(
-                50, 50,
+                (int) (width * 0.02), (int) (height * 0.012),
                 WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY,
                 WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
                 PixelFormat.TRANSLUCENT
