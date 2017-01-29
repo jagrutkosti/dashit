@@ -20,6 +20,7 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.SurfaceHolder;
@@ -27,8 +28,11 @@ import android.view.SurfaceView;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -113,6 +117,7 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
                 PixelFormat.TRANSLUCENT
         );
         layoutParams.gravity = Gravity.TOP | Gravity.END;
+        layoutParams.screenOrientation = 90;
         windowManager.addView(surfaceView, layoutParams);
         surfaceView.getHolder().addCallback(this);
     }
@@ -205,17 +210,28 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
     public void startRecording(String fileName) {
         recordingStatus = true;
         camera = Camera.open();
-        mediaRecorder = new MediaRecorder();
         camera.setDisplayOrientation(90);
+        Camera.Parameters parameters = camera.getParameters();
+        parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+        parameters.set("cam_mode", 1);
+        camera.setParameters(parameters);
         camera.unlock();
 
-        mediaRecorder.setPreviewDisplay(globalHolder.getSurface());
+        CamcorderProfile profile = null;
+        if(CamcorderProfile.hasProfile(CamcorderProfile.QUALITY_720P)){
+            profile = CamcorderProfile.get(CamcorderProfile.QUALITY_720P);
+        }else if(CamcorderProfile.hasProfile(CamcorderProfile.QUALITY_480P)){
+            profile = CamcorderProfile.get(CamcorderProfile.QUALITY_480P);
+        }else{ profile = CamcorderProfile.get(CamcorderProfile.QUALITY_LOW); }
+
+        mediaRecorder = new MediaRecorder();
         mediaRecorder.setCamera(camera);
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
         mediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
-        mediaRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH));
-
+        mediaRecorder.setProfile(profile);
+        mediaRecorder.setOrientationHint(90);
         mediaRecorder.setOutputFile(Environment.getExternalStorageDirectory().toString() + "/" + fileName + ".mp4");
+        mediaRecorder.setPreviewDisplay(globalHolder.getSurface());
 
         try {
             mediaRecorder.prepare();
@@ -259,20 +275,11 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
             dir.mkdirs();
 
         for (int i = 0; i < 3; i++) {
-            File file = new File(Environment.getExternalStorageDirectory().toString() + "/dashit" + orderOfVideo[i] + ".mp4");
-            if (file.exists() && !file.isDirectory()) {
-                byte[] byteArray = new byte[(int) file.length()];
-                try {
-                    FileOutputStream target = new FileOutputStream(dir.getPath() + "/" + (i + 1) + "accVideo" + orderOfVideo[i] + ".mp4");
-                    InputStream fileIS = new FileInputStream(file);
-                    fileIS.read(byteArray);
-                    target.write(byteArray);
-
-                    fileIS.close();
-                    target.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            File fileFrom = new File(Environment.getExternalStorageDirectory().toString() + "/dashit" + orderOfVideo[i] + ".mp4");
+            if (fileFrom.exists() && !fileFrom.isDirectory()) {
+                File fileTo = new File(dir.getPath() + "/" + (i + 1) + "accVideo" + orderOfVideo[i] + ".mp4");
+                if(fileFrom.renameTo(fileTo))
+                    Log.i("Video Files: ", "Saved Successfully");
             }
         }
 
