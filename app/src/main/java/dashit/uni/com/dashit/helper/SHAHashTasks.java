@@ -1,4 +1,4 @@
-package dashit.uni.com.dashit.model;
+package dashit.uni.com.dashit.helper;
 
 import android.util.Log;
 

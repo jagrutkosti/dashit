@@ -1,17 +1,14 @@
 package dashit.uni.com.dashit.service;
 
 import android.app.Service;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Location;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.os.IBinder;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationServices;
+import android.view.View;
+import dashit.uni.com.dashit.helper.LocationAssistant;
 
 /**
  * Created by Jagrut on 24-Jan-17.
@@ -19,32 +16,26 @@ import com.google.android.gms.location.LocationServices;
  * at least 50 meters in the next 10 seconds.
  */
 
-public class LocationChangeService extends Service implements GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener{
+public class LocationChangeService extends Service implements LocationAssistant.Listener{
 
-    private GoogleApiClient googleApiClient;
-    private Location currentLocation;
-
+    private Location firstLocation;
+    private LocationAssistant locationAssistant;
+    int count = 0;
+    boolean tenSecondsElapsed = false;
     /**
-     * Connect to LocationService to get the current location of the device.
+     * Connect to LocationAssistant to get the current location of the device and do not allow mock locations.
      */
     @Override
     public void onCreate() {
         super.onCreate();
-        if(googleApiClient == null){
-            googleApiClient = new GoogleApiClient.Builder(getApplicationContext())
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
-                    .addApi(LocationServices.API)
-                    .build();
-            googleApiClient.connect();
-        }
+        locationAssistant = new LocationAssistant(this, this, LocationAssistant.Accuracy.HIGH, 500, false);
+        locationAssistant.start();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        googleApiClient.disconnect();
+        locationAssistant.stop();
     }
 
     @Nullable
@@ -54,49 +45,88 @@ public class LocationChangeService extends Service implements GoogleApiClient.Co
     }
 
     @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        //Perform the waiting task in asynchronous mode
-        new WaitForLocationCheck().execute();
-        stopSelf();
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
+    public void onNeedLocationPermission() {
 
     }
 
     @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+    public void onExplainLocationPermission() {
 
+    }
+
+    @Override
+    public void onLocationPermissionPermanentlyDeclined(View.OnClickListener fromView, DialogInterface.OnClickListener fromDialog) {
+
+    }
+
+    @Override
+    public void onNeedLocationSettingsChange() {
+
+    }
+
+    @Override
+    public void onFallBackToSystemSettings(View.OnClickListener fromView, DialogInterface.OnClickListener fromDialog) {
+
+    }
+
+    /**
+     * Called when a new location is available.
+     * @param lastLocation The last known  location of the device
+     */
+    @Override
+    public void onNewLocationAvailable(Location lastLocation) {
+        if(lastLocation != null && count == 0){
+            //For first location, initiate counter and save this location
+            firstLocation = lastLocation;
+            new WaitForLocationCheck().execute();
+        }
+        count++;
+        checkDistance(lastLocation);
+    }
+
+    @Override
+    public void onMockLocationsDetected(View.OnClickListener fromView, DialogInterface.OnClickListener fromDialog) {
+
+    }
+
+    @Override
+    public void onError(LocationAssistant.ErrorType type, String message) {
+
+    }
+
+    /**
+     * Check the distance from first known location with last known location.
+     * If distance is less than 50 meters, initiate a collisionDetected broadcast.
+     * @param lastLocation The last known location received from LocationAssistant
+     */
+    public void checkDistance(Location lastLocation) {
+        if(tenSecondsElapsed){
+            float distanceInMeters = lastLocation.distanceTo(firstLocation);
+            if(distanceInMeters < 50.00){
+                String accidentLocation = String.valueOf(lastLocation.getLatitude());
+                accidentLocation = accidentLocation + "," + String.valueOf(lastLocation.getLongitude());
+
+                Intent collisionDetectedIntent = new Intent();
+                collisionDetectedIntent.setAction("com.collisionDetected.Broadcast");
+                collisionDetectedIntent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
+                collisionDetectedIntent.putExtra("accidentLocation", accidentLocation);
+                sendBroadcast(collisionDetectedIntent);
+                stopSelf();
+            }
+        }
     }
 
     /**
      * Asynchronously wait for 10 seconds and again get the location to check if it has changed.
      */
-    public class WaitForLocationCheck extends AsyncTask<Void, Void, Void>{
+    public class WaitForLocationCheck extends AsyncTask<Void, Void, Void> {
         @Override
         protected Void doInBackground(Void... voids) {
-            Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
-            if(lastLocation != null){
-                currentLocation = lastLocation;
-                try {
-                    //Wait for 10 seconds and again get the location and consecutively, distance
-                    Thread.sleep(10000);
-                    float distanceInMeters = lastLocation.distanceTo(currentLocation);
-
-                    if(distanceInMeters < 50.00){
-                        String accidentLocation = String.valueOf(lastLocation.getLatitude());
-                        accidentLocation = accidentLocation + "," + String.valueOf(lastLocation.getLongitude());
-
-                        Intent collisionDetectedIntent = new Intent();
-                        collisionDetectedIntent.setAction("com.collisionDetected.Broadcast");
-                        collisionDetectedIntent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
-                        collisionDetectedIntent.putExtra("accidentLocation", accidentLocation);
-                        sendBroadcast(collisionDetectedIntent);
-                    }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+            try {
+                Thread.sleep(10000);
+                tenSecondsElapsed = true;
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
             return null;
         }

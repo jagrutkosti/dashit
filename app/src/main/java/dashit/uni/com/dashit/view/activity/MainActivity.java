@@ -5,27 +5,15 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.IntentSender;
-import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.telephony.SmsManager;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.Toast;
-
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationListener;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -36,8 +24,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import dashit.uni.com.dashit.DashItApplication;
 import dashit.uni.com.dashit.R;
+import dashit.uni.com.dashit.helper.LocationAssistant;
 import dashit.uni.com.dashit.service.BackgroundService;
 import dashit.uni.com.dashit.service.SensorService;
 
@@ -46,20 +34,14 @@ import dashit.uni.com.dashit.service.SensorService;
  * The Video Recording Activity. All monitoring services are triggered from this activity.
  * View after the user hits 'Record' icon.
  */
-public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener, OnMapReadyCallback,
-        LocationListener {
+public class MainActivity extends AppCompatActivity implements  OnMapReadyCallback, LocationAssistant.Listener{
 
     private static ImageView imgView;
-
-    //Define a request code to send to Google Play services
-    private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
-    private GoogleApiClient googleApiClient;
-    private LocationRequest locationRequest;
     private GoogleMap googleMap;
     private LatLng latLng;
     private SupportMapFragment mapFragment;
     private Marker currentLocationMarker;
+    private LocationAssistant locationAssistant;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,11 +72,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         registerReceiver(collisionBroadcastReceiver, new IntentFilter("COLLISION_DETECTED_INTERNAL"));
         Snackbar.make(findViewById(android.R.id.content), "You can switch application", Snackbar.LENGTH_LONG).show();
 
-        // Create the LocationRequest object
-        locationRequest = LocationRequest.create()
-                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-                .setInterval(10 * 1000)
-                .setFastestInterval(1000);
+        // Create the LocationAssistant object
+        locationAssistant = new LocationAssistant(this, this, LocationAssistant.Accuracy.HIGH, 500, false);
+        locationAssistant.start();
 
         //Create Map Fragment to display Google Maps
         mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -105,6 +85,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(collisionBroadcastReceiver);
+        locationAssistant.stop();
     }
 
     @Override
@@ -122,82 +103,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public void onMapReady(GoogleMap gMap) {
         googleMap = gMap;
         googleMap.setMyLocationEnabled(true);
-        buildGoogleApiClient();
-        googleApiClient.connect();
-    }
-
-    protected synchronized void buildGoogleApiClient() {
-        googleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .build();
-    }
-
-    /**
-     * Set up map with current location
-     */
-    @Override
-    public void onConnected(Bundle bundle) {
-        Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
-
-        if (lastLocation != null) {
-            //If everything went fine lets get latitude and longitude
-            latLng = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
-            MarkerOptions markerOptions = new MarkerOptions();
-            markerOptions.position(latLng);
-            markerOptions.title("Current Location");
-            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
-            currentLocationMarker = googleMap.addMarker(markerOptions);
-        }
-
-        locationRequest = new LocationRequest();
-        locationRequest.setInterval(2000);
-        locationRequest.setFastestInterval(1000);
-        locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
-        LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
-    /**
-     * Change the position of marker on map when location is changed.
-     */
-    @Override
-    public void onLocationChanged(Location location) {
-        if(currentLocationMarker != null){
-            currentLocationMarker.remove();
-        }
-
-        latLng = new LatLng(location.getLatitude(), location.getLongitude());
-        MarkerOptions markerOptions = new MarkerOptions();
-        markerOptions.position(latLng);
-        markerOptions.title("Current Location");
-        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
-        currentLocationMarker = googleMap.addMarker(markerOptions);
-
-        //zoom to current position:
-        CameraPosition cameraPosition = new CameraPosition.Builder()
-                .target(latLng).zoom(14).build();
-
-        googleMap.animateCamera(CameraUpdateFactory
-                .newCameraPosition(cameraPosition));
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-        if (connectionResult.hasResolution()) {
-            try {
-                connectionResult.startResolutionForResult(this, CONNECTION_FAILURE_RESOLUTION_REQUEST);
-            } catch (IntentSender.SendIntentException e) {
-                e.printStackTrace();
-            }
-        } else {
-            Log.e("Error", "Location services connection failed with code " + connectionResult.getErrorCode());
-        }
     }
 
     /**
@@ -261,6 +166,66 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         }
     };
+
+    @Override
+    public void onNeedLocationPermission() {
+
+    }
+
+    @Override
+    public void onExplainLocationPermission() {
+
+    }
+
+    @Override
+    public void onLocationPermissionPermanentlyDeclined(View.OnClickListener fromView, DialogInterface.OnClickListener fromDialog) {
+
+    }
+
+    @Override
+    public void onNeedLocationSettingsChange() {
+
+    }
+
+    @Override
+    public void onFallBackToSystemSettings(View.OnClickListener fromView, DialogInterface.OnClickListener fromDialog) {
+
+    }
+
+    /**
+     * Change the location on map when a location is available. Is not called when receiving a mock location.
+     * @param location the current user location
+     */
+    @Override
+    public void onNewLocationAvailable(Location location) {
+        if(currentLocationMarker != null){
+            currentLocationMarker.remove();
+        }
+
+        latLng = new LatLng(location.getLatitude(), location.getLongitude());
+        MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.position(latLng);
+        markerOptions.title("Current Location");
+        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+        currentLocationMarker = googleMap.addMarker(markerOptions);
+
+        //zoom to current position:
+        CameraPosition cameraPosition = new CameraPosition.Builder()
+                .target(latLng).zoom(14).build();
+
+        googleMap.animateCamera(CameraUpdateFactory
+                .newCameraPosition(cameraPosition));
+    }
+
+    @Override
+    public void onMockLocationsDetected(View.OnClickListener fromView, DialogInterface.OnClickListener fromDialog) {
+
+    }
+
+    @Override
+    public void onError(LocationAssistant.ErrorType type, String message) {
+
+    }
 
     /**
      * Steps to take in case a collision is detected, notified from LocationChangeService.

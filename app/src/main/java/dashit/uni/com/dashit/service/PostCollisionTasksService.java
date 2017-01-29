@@ -21,11 +21,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
 
 import dashit.uni.com.dashit.DashItApplication;
 import dashit.uni.com.dashit.R;
-import dashit.uni.com.dashit.model.SHAHashTasks;
+import dashit.uni.com.dashit.helper.SHAHashTasks;
 
 /**
  * Created by Jagrut on 25-Jan-17.

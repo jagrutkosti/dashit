@@ -21,7 +21,7 @@ import java.io.File;
 import java.util.ArrayList;
 
 import dashit.uni.com.dashit.R;
-import dashit.uni.com.dashit.model.SHAHashTasks;
+import dashit.uni.com.dashit.helper.SHAHashTasks;
 
 /**
  * Activity that shows the visualization related to the History files.

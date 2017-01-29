@@ -19,15 +19,12 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 import dashit.uni.com.dashit.R;
 import dashit.uni.com.dashit.model.HistoryFiles;
-import dashit.uni.com.dashit.model.SHAHashTasks;
+import dashit.uni.com.dashit.helper.SHAHashTasks;
 
 /**
  * Created by Jagrut on 29-Nov-16.
