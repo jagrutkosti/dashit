@@ -23,7 +23,7 @@
     <ImageButton
         android:id="@+id/start"
         android:clickable="true"
-        android:contentDescription="@string/startRecordingDesc"
+        android:contentDescription="@string/activity_home_startRecording_description"
         android:background="@drawable/circle"
         android:tint="@android:color/white"
         android:adjustViewBounds="false"
@@ -47,8 +47,9 @@
         android:textColor="@android:color/white"
         tools:text="@string/activity_home_button_text"
         android:textSize="18sp"
+        android:textStyle="normal|bold"
         android:layout_below="@+id/start"
         android:layout_centerHorizontal="true"
-        android:textStyle="normal|bold" />
+        android:layout_marginTop="13dp" />
 
 </RelativeLayout>

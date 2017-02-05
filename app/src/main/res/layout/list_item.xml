@@ -11,7 +11,8 @@
         android:id="@+id/hashStatus"
         android:layout_alignParentTop="true"
         android:layout_alignParentStart="true"
-        android:layout_margin="10dp" />
+        android:layout_margin="10dp"
+        android:contentDescription="@string/list_item_status_icon_description" />
 
     <TextView
         android:id="@+id/lblListItem"
@@ -19,10 +20,11 @@
         android:layout_height="match_parent"
         android:paddingTop="5dp"
         android:paddingBottom="5dp"
-        android:paddingLeft="?android:attr/expandableListPreferredChildPaddingLeft"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         android:gravity="center"
         android:textSize="22sp"
-        android:layout_alignParentTop="true" />
+        android:layout_alignParentTop="true"
+        android:paddingStart="?android:attr/expandableListPreferredChildPaddingLeft"
+        android:paddingEnd="0dp" />
 
 </RelativeLayout>

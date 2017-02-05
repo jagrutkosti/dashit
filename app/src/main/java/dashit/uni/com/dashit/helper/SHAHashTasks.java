@@ -20,11 +20,16 @@ import dashit.uni.com.dashit.R;
 
 /**
  * Created by Jagrut on 25-Jan-17.
+ * Helper methods to assist in tasks related to hash.
+ * Methods are reusable
  */
 
 public class SHAHashTasks {
     /**
-     * Create a byte array of video files in given directory and location and then generate hash.
+     * Generate SHA-256 hash of video files in given directory and location
+     * @param directory the directory of video files for which to generate hash
+     * @param location GPS co-ordinates in the form of <Latitude, Longitude> as String
+     * @return The computed SHA-256 hash
      */
     public static String generateHashFromFilesAndLocation(String directory, String location){
         String generateHashFromFileAndLocation = null;

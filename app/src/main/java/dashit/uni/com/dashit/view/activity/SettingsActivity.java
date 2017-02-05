@@ -32,21 +32,21 @@ public class SettingsActivity extends AppCompatActivity {
 
             EditTextPreference textPref = (EditTextPreference) findPreference("myName");
             if(textPref.getText() != null)
-                textPref.setSummary("Your name: " + textPref.getText());
+                textPref.setSummary(getString(R.string.preference_name_summary_set) + textPref.getText());
             else
-                textPref.setSummary("Your name: Not set");
+                textPref.setSummary(getString(R.string.preference_name_summary_not_set));
 
             textPref = (EditTextPreference) findPreference("myPhoneNumber");
             if(textPref.getText() != null)
-                textPref.setSummary("Your phone number: " + textPref.getText());
+                textPref.setSummary(getString(R.string.preference_phone_summary_set) + textPref.getText());
             else
-                textPref.setSummary("Your phone number: Not set");
+                textPref.setSummary(getString(R.string.preference_phone_summary_not_set));
 
             textPref = (EditTextPreference) findPreference("contact");
             if(textPref.getText() != null)
-                textPref.setSummary("Your emergency contact: " + textPref.getText());
+                textPref.setSummary(getString(R.string.preference_emergency_summary_set) + textPref.getText());
             else
-                textPref.setSummary("Your emergency contact: Not set");
+                textPref.setSummary(getString(R.string.preference_emergency_summary_not_set));
         }
 
         @Override
@@ -54,25 +54,24 @@ public class SettingsActivity extends AppCompatActivity {
             Preference changedPreference = findPreference(key);
             if(changedPreference instanceof  EditTextPreference){
                 EditTextPreference textPref = (EditTextPreference) findPreference(key);
-                String title = (String) textPref.getTitle();
-                switch(title){
-                    case "Name":
+                switch(key){
+                    case "myName":
                         if(textPref.getText() != null)
-                            textPref.setSummary("Your name: " + textPref.getText());
+                            textPref.setSummary(getString(R.string.preference_name_summary_set) + textPref.getText());
                         else
-                            textPref.setSummary("Your name: Not set");
+                            textPref.setSummary(getString(R.string.preference_name_summary_not_set));
                         break;
-                    case "Phone Number":
+                    case "myPhoneNumber":
                         if(textPref.getText() != null)
-                            textPref.setSummary("Your phone number: " + textPref.getText());
+                            textPref.setSummary(getString(R.string.preference_phone_summary_set) + textPref.getText());
                         else
-                            textPref.setSummary("Your phone number: Not set");
+                            textPref.setSummary(getString(R.string.preference_phone_summary_not_set));
                         break;
-                    case "Emergency Contact":
+                    case "contact":
                         if(textPref.getText() != null)
-                            textPref.setSummary("Your emergency contact: " + textPref.getText());
+                            textPref.setSummary(getString(R.string.preference_emergency_summary_set) + textPref.getText());
                         else
-                            textPref.setSummary("Your emergency contact: Not set");
+                            textPref.setSummary(getString(R.string.preference_emergency_summary_not_set));
                         break;
                 }
             }

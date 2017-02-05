@@ -79,7 +79,7 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
                 delPreviousFiles.delete();
             }
         } else {
-            Toast.makeText(BackgroundService.this, "Storage device not available.", Toast.LENGTH_LONG).show();
+            Toast.makeText(BackgroundService.this, R.string.instruction_storage_device_problem, Toast.LENGTH_LONG).show();
             onDestroy();
         }
 
@@ -102,7 +102,7 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
         notification.flags = Notification.FLAG_AUTO_CANCEL | Notification.FLAG_ONGOING_EVENT;
         startForeground(Integer.MAX_VALUE, notification);
 
-        // Create new SurfaceView, set its size to 50x50, move it to the top right corner and set this service as a callback
+        // Create new SurfaceView, set its size to a small square relative to screen size and DPI
         windowManager = (WindowManager) this.getSystemService(Context.WINDOW_SERVICE);
         surfaceView = new SurfaceView(this);
         DisplayMetrics displaymetrics = new DisplayMetrics();
@@ -116,6 +116,8 @@ public class BackgroundService extends Service implements SurfaceHolder.Callback
                 WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
                 PixelFormat.TRANSLUCENT
         );
+
+        // Move it to the top right corner and set this service as a callback
         layoutParams.gravity = Gravity.TOP | Gravity.END;
         layoutParams.screenOrientation = 90;
         windowManager.addView(surfaceView, layoutParams);

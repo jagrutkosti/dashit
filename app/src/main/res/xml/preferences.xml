@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <CheckBoxPreference
-        android:title="Send SMS"
+        android:title="@string/preference_sms_title"
         android:key="sendSms"
-        android:summary="To notify Emergency Contact when collision is detected"/>
+        android:summary="@string/preference_sms_summary"/>
     <EditTextPreference
-        android:title="Name"
+        android:title="@string/preference_name_title"
         android:key="myName"
         android:maxLength="25"
-        android:dialogMessage="Max length: 25"
+        android:dialogMessage="@string/preference_name_dialogMessage"
         android:summary="%s"/>
     <EditTextPreference
-        android:title="Phone Number"
+        android:title="@string/preference_phone_title"
         android:key="myPhoneNumber"
         android:inputType="phone"
         android:maxLength="15"
-        android:dialogMessage="Please add county code. Max length: 15"
+        android:dialogMessage="@string/preference_phone_dialogMessage"
         android:summary="%s" />
     <EditTextPreference
-        android:title="Emergency Contact"
+        android:title="@string/preference_emergency_title"
         android:key="contact"
         android:inputType="phone"
         android:maxLength="15"
-        android:dialogMessage="Please add county code. Max length: 15"
+        android:dialogMessage="@string/preference_emergency_dialogMessage"
         android:summary="%s" />
 </PreferenceScreen>

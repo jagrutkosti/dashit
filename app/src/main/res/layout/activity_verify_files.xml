@@ -13,20 +13,20 @@
 
     <TextView
         android:id="@+id/fileName1"
-        android:text="@string/fileName"
+        android:text="@string/activity_verify_files_fileName_placeholder"
         android:layout_below="@+id/directoryVerify"
         android:layout_alignParentStart="true"
         android:background="@drawable/ic_movie_black_48dp"
         android:paddingTop="25dp"
         android:textColor="@android:color/background_light"
-        android:paddingLeft="7dp"
-        android:paddingRight="5dp"
+        android:paddingStart="7dp"
+        android:paddingEnd="5dp"
         android:paddingBottom="5dp"
         android:layout_width="70dp"
         android:layout_height="80dp" />
 
     <TextView
-        android:text="@string/fileName"
+        android:text="@string/activity_verify_files_fileName_placeholder"
         android:layout_width="70dp"
         android:layout_height="80dp"
         android:id="@+id/fileName2"
@@ -35,12 +35,12 @@
         android:background="@drawable/ic_movie_black_48dp"
         android:textColor="@android:color/background_light"
         android:paddingTop="25dp"
-        android:paddingLeft="7dp"
+        android:paddingStart="7dp"
         android:paddingBottom="5dp"
-        android:paddingRight="5dp" />
+        android:paddingEnd="5dp" />
 
     <TextView
-        android:text="@string/fileName"
+        android:text="@string/activity_verify_files_fileName_placeholder"
         android:layout_width="70dp"
         android:layout_height="80dp"
         android:id="@+id/fileName3"
@@ -49,12 +49,12 @@
         android:background="@drawable/ic_movie_black_48dp"
         android:paddingTop="25dp"
         android:textColor="@android:color/background_light"
-        android:paddingLeft="7dp"
+        android:paddingStart="7dp"
         android:paddingBottom="5dp"
-        android:paddingRight="5dp" />
+        android:paddingEnd="5dp" />
 
     <TextView
-        android:text="@string/directoryName"
+        android:text="@string/activity_verify_files_directoryName_placeholder"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/directoryVerify"
@@ -63,7 +63,7 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true" />
 
-    <ImageView
+    <android.support.v7.widget.AppCompatImageView
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:id="@+id/plus1"
@@ -71,16 +71,18 @@
         android:layout_toEndOf="@+id/fileName1"
         android:layout_marginTop="16dp"
         android:background="@drawable/ic_forward_black_48dp"
-        android:backgroundTint="@android:color/holo_orange_light" />
+        app:backgroundTint="@android:color/holo_orange_light"
+        android:contentDescription="@string/activity_verify_files_arrow_icon_description" />
 
-    <ImageView
+    <android.support.v7.widget.AppCompatImageView
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:id="@+id/plus2"
         android:background="@drawable/ic_forward_black_48dp"
         android:layout_alignTop="@+id/plus1"
         android:layout_toEndOf="@+id/directoryVerify"
-        android:backgroundTint="@android:color/holo_orange_light" />
+        app:backgroundTint="@android:color/holo_orange_light"
+        android:contentDescription="@string/activity_verify_files_arrow_icon_description" />
 
     <RelativeLayout
         android:layout_width="wrap_content"
@@ -90,27 +92,29 @@
         android:background="@drawable/back"
         android:layout_height="50dp"
         android:paddingTop="5dp">
-        <ImageView
+        <android.support.v7.widget.AppCompatImageView
             android:layout_alignParentStart="true"
             android:id="@+id/hashIcon"
-            android:backgroundTint="@android:color/holo_orange_light"
+            app:backgroundTint="@android:color/holo_orange_light"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:background="@drawable/hashtag" />
+            android:background="@drawable/hashtag"
+            android:contentDescription="@string/activity_verify_files_hash_icon_description" />
 
         <TextView
-            android:text="@string/hashValue"
+            android:text="@string/activity_verify_files_hashValue_placeholder"
             android:layout_width="wrap_content"
             android:id="@+id/hashValue"
             android:layout_height="40dp"
             android:layout_alignParentEnd="true"
             android:layout_toEndOf="@+id/hashIcon"
             android:gravity="center_vertical"
-            android:paddingLeft="10dp" />
+            android:paddingStart="10dp"
+            android:paddingEnd="0dp" />
 
     </RelativeLayout>
 
-    <ImageView
+    <android.support.v7.widget.AppCompatImageView
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:id="@+id/arrowDown"
@@ -118,21 +122,23 @@
         android:layout_below="@+id/relativeLayout"
         android:layout_centerHorizontal="true"
         android:rotation="90"
-        android:backgroundTint="@android:color/holo_orange_light"
-        android:visibility="invisible" />
+        app:backgroundTint="@android:color/holo_orange_light"
+        android:visibility="invisible"
+        android:contentDescription="@string/activity_verify_files_arrow_icon_description" />
 
-    <ImageView
+    <android.support.v7.widget.AppCompatImageView
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:id="@+id/bitcoin"
         android:background="@drawable/bitcoin"
-        android:backgroundTint="@android:color/background_dark"
+        app:backgroundTint="@android:color/background_dark"
         android:layout_below="@+id/arrowDown"
         android:layout_alignStart="@+id/arrowDown"
-        android:visibility="invisible" />
+        android:visibility="invisible"
+        android:contentDescription="@string/activity_verify_files_bitcoin_icon_description" />
 
     <TextView
-        android:text="@string/hashSubmission"
+        android:text="@string/activity_verify_files_hashSubmission"
         android:layout_width="match_parent"
         android:layout_height="30dp"
         android:id="@+id/hashSubmission"
@@ -141,7 +147,7 @@
         android:layout_alignParentEnd="true"
         android:gravity="center" />
 
-    <ImageView
+    <android.support.v7.widget.AppCompatImageView
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_below="@+id/hashSubmission"
@@ -149,9 +155,10 @@
         android:layout_marginTop="26dp"
         android:id="@+id/txArrow"
         android:background="@drawable/ic_forward_black_48dp"
-        android:backgroundTint="@android:color/holo_orange_light"
+        app:backgroundTint="@android:color/holo_orange_light"
         android:rotation="90"
-        android:visibility="invisible" />
+        android:visibility="invisible"
+        android:contentDescription="@string/activity_verify_files_arrow_icon_description" />
 
     <RelativeLayout
         android:layout_width="wrap_content"
@@ -163,25 +170,27 @@
         android:layout_alignParentStart="true"
         android:layout_marginTop="44dp"
         android:visibility="invisible">
-        <ImageView
+        <android.support.v7.widget.AppCompatImageView
             android:layout_alignParentStart="true"
             android:id="@+id/txHashIcon"
-            android:backgroundTint="@android:color/holo_orange_light"
+            app:backgroundTint="@android:color/holo_orange_light"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:background="@drawable/hashtag"
-            android:visibility="visible" />
+            android:visibility="visible"
+            android:contentDescription="@string/activity_verify_files_hash_icon_description" />
 
         <TextView
-            android:text="@string/hashValue"
+            android:text="@string/activity_verify_files_hashValue_placeholder"
             android:layout_width="wrap_content"
             android:id="@+id/txHashText"
             android:layout_height="40dp"
             android:gravity="center_vertical"
-            android:paddingLeft="10dp"
             android:visibility="visible"
-            android:layout_toRightOf="@+id/txHashIcon"
-            android:layout_toLeftOf="@+id/button"/>
+            android:layout_toEndOf="@+id/txHashIcon"
+            android:layout_toStartOf="@+id/button"
+            android:paddingStart="10dp"
+            android:paddingEnd="0dp" />
 
         <Button
             android:id="@+id/button"
@@ -196,7 +205,7 @@
     </RelativeLayout>
 
     <TextView
-        android:text="@string/transactionHash"
+        android:text="@string/activity_verify_files_transactionHash"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/txHashHeading"
@@ -207,13 +216,13 @@
         android:layout_centerHorizontal="true" />
 
     <android.support.v7.widget.AppCompatButton
-        android:text="@string/verifyButton"
+        android:text="@string/activity_verify_files_verifyButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:id="@+id/verifyButton"
-        android:backgroundTint="@android:color/holo_orange_light"
+        app:backgroundTint="@android:color/holo_orange_light"
         android:visibility="invisible" />
 
 </RelativeLayout>

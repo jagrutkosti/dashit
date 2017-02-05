@@ -54,7 +54,7 @@
         </activity>
         <activity
             android:name=".view.activity.MainActivity"
-            android:label="@string/recording"
+            android:label="@string/title_activity_main"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -64,7 +64,7 @@
         </activity>
         <activity
             android:name=".view.activity.HistoryVerifyActivity"
-            android:label="@string/action_history_verify"
+            android:label="@string/menu_action_history_verify"
             android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -72,7 +72,7 @@
         </activity>
         <activity
             android:name=".view.activity.SettingsActivity"
-            android:label="@string/action_settings"
+            android:label="@string/menu_action_settings"
             android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

@@ -78,7 +78,7 @@ public class MainActivity extends AppCompatActivity implements  OnMapReadyCallba
             }
         });
         registerReceiver(collisionBroadcastReceiver, new IntentFilter("COLLISION_DETECTED_INTERNAL"));
-        Snackbar.make(findViewById(android.R.id.content), "You can switch application", Snackbar.LENGTH_LONG).show();
+        Snackbar.make(findViewById(android.R.id.content), R.string.instruction_application_switch_possible, Snackbar.LENGTH_LONG).show();
 
         // Create the LocationAssistant object
         locationAssistant = new LocationAssistant(this, this, LocationAssistant.Accuracy.HIGH, 500, false);
@@ -123,12 +123,12 @@ public class MainActivity extends AppCompatActivity implements  OnMapReadyCallba
         public void onReceive(Context context, final Intent intent) {
             if(singleDialog == 1){
                 AlertDialog.Builder confirmDialogBuilder = new AlertDialog.Builder(MainActivity.this);
-                confirmDialogBuilder.setMessage("Was this a collision?");
+                confirmDialogBuilder.setMessage(R.string.dialog_message);
                 confirmDialogBuilder.setCancelable(false);
-                confirmDialogBuilder.setTitle("Please confirm");
+                confirmDialogBuilder.setTitle(R.string.dialog_title);
 
                 confirmDialogBuilder.setPositiveButton(
-                        "Yes",
+                        R.string.dialog_yes,
                         new DialogInterface.OnClickListener() {
                             //Confirm collision and then notify BackgroundService of the same
                             public void onClick(DialogInterface dialog, int id) {
@@ -143,7 +143,7 @@ public class MainActivity extends AppCompatActivity implements  OnMapReadyCallba
                         });
 
                 confirmDialogBuilder.setNegativeButton(
-                        "No",
+                        R.string.dialog_no,
                         new DialogInterface.OnClickListener() {
                             //False Positive
                             public void onClick(DialogInterface dialog, int id) {

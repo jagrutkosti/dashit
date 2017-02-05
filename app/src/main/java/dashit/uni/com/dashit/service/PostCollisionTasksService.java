@@ -113,7 +113,7 @@ public class PostCollisionTasksService extends Service {
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(DashItApplication.getAppContext(), "Hash sent successfully!", Toast.LENGTH_LONG).show();
+                        Toast.makeText(DashItApplication.getAppContext(), R.string.instruction_hash_sent_successful, Toast.LENGTH_LONG).show();
                     }
                 });
             } catch (IOException e) {
@@ -121,7 +121,7 @@ public class PostCollisionTasksService extends Service {
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(DashItApplication.getAppContext(), "Problems while sending hash. Please check you internet connection.", Toast.LENGTH_LONG).show();
+                        Toast.makeText(DashItApplication.getAppContext(), R.string.instruction_hash_sent_unsuccessful, Toast.LENGTH_LONG).show();
                     }
                 });
             }
@@ -142,9 +142,9 @@ public class PostCollisionTasksService extends Service {
                 String emergencyContact = SP.getString("contact", "NA");
                 String location = "http://maps.google.com/?q=";
                 location += accidentLocation;
-                String message = "Your contact: " + myName + "\n needs urgent help!" +
-                        "\n Phone number: " + myPhoneNumber + "," +
-                        "\n Current location: " + location;
+                String message = R.string.sms_message_contact + myName + R.string.sms_message_help +
+                        R.string.sms_message_your_phone_number + myPhoneNumber + "," +
+                        R.string.sms_message_location + location;
                 String hashMessage = "SHA-256 Hash:" + hashFromFilesAndLocation;
                 System.out.println(message);
                 //Send SMS
@@ -156,10 +156,16 @@ public class PostCollisionTasksService extends Service {
                         handler.post(new Runnable() {
                             @Override
                             public void run() {
-                                Toast.makeText(DashItApplication.getAppContext(), "SMS Sent!", Toast.LENGTH_LONG).show();
+                                Toast.makeText(DashItApplication.getAppContext(), R.string.instruction_sms_sent_successful, Toast.LENGTH_LONG).show();
                             }
                         });
                     } catch (Exception e) {
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(DashItApplication.getAppContext(), R.string.instruction_sms_sent_unsuccessful, Toast.LENGTH_LONG).show();
+                            }
+                        });
                         e.printStackTrace();
                     }
                 }

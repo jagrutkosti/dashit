@@ -88,7 +88,7 @@ public class HomeActivity extends AppCompatActivity {
             NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
             networkStatus = (networkInfo != null && networkInfo.isConnected());
             if(!networkStatus)
-                Snackbar.make(findViewById(android.R.id.content), "Please connect to Internet", Snackbar.LENGTH_INDEFINITE).show();
+                Snackbar.make(findViewById(android.R.id.content), R.string.instruction_internet_unavailable, Snackbar.LENGTH_INDEFINITE).show();
             return null;
         }
     }

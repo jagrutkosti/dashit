@@ -85,7 +85,7 @@ public class VerifyFilesActivity extends AppCompatActivity {
                 ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                 ClipData clip = ClipData.newPlainText("txHash", txText.getText());
                 clipboard.setPrimaryClip(clip);
-                Toast.makeText(VerifyFilesActivity.this, "Transaction Hash Copied", Toast.LENGTH_LONG).show();
+                Toast.makeText(VerifyFilesActivity.this, R.string.instruction_transactionHash_copied, Toast.LENGTH_LONG).show();
             }
         });
 
@@ -182,18 +182,18 @@ public class VerifyFilesActivity extends AppCompatActivity {
                 bitcoin.setVisibility(View.VISIBLE);
                 hashSubmissionView.setVisibility(View.VISIBLE);
                 if(txHash != null && txHash.length() > 0){
-                    hashSubmissionView.setText(R.string.hashSubmission);
+                    hashSubmissionView.setText(R.string.activity_verify_files_hashSubmission);
                     txLayout.setVisibility(View.VISIBLE);
                     txArrow.setVisibility(View.VISIBLE);
                     txHeading.setVisibility(View.VISIBLE);
                     txText.setText(txHash);
                     verifyButton.setVisibility(View.VISIBLE);
                 }else{
-                    hashSubmissionView.setText(R.string.hashNoSubmission);
+                    hashSubmissionView.setText(R.string.activity_verify_files_hashNoSubmission);
                     hashSubmissionView.setTextColor(Color.RED);
                 }
             }else{
-                hashValueView.setText(R.string.hashNotCorrect);
+                hashValueView.setText(R.string.activity_verify_files_hashNotCorrect);
                 hashValueView.setTextColor(Color.RED);
             }
         }

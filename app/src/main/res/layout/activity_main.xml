@@ -44,7 +44,6 @@
                         <TextView
                             android:layout_width="fill_parent"
                             android:layout_height="wrap_content"
-                            android:elevation="0dp"
                             android:text="@string/activity_main_current_status_safe"
                             android:textColor="@android:color/holo_green_dark"
                             android:textSize="@dimen/settings_labels_fontsize_item"
@@ -66,12 +65,11 @@
                         android:layout_width="fill_parent"
                         android:layout_height="fill_parent"
                         android:layout_weight="4"
-                        android:elevation="0dp"
                         android:gravity="center|end">
 
                         <ImageView
                             android:id="@+id/status"
-                            android:contentDescription="@string/status"
+                            android:contentDescription="@string/activity_main_status_icon_description"
                             android:src="@drawable/green_dot"
                             android:layout_width="30dp"
                             android:layout_height="30dp" />
@@ -102,11 +100,11 @@
 
     </LinearLayout>
 
-    <ImageButton
+    <android.support.v7.widget.AppCompatImageButton
         android:id="@+id/stop_recording"
         android:layout_gravity="bottom|center"
         android:background="@drawable/circle"
-        android:backgroundTint="@android:color/holo_red_dark"
+        app:backgroundTint="@android:color/holo_red_dark"
         app:srcCompat="@drawable/square"
         android:layout_marginBottom="2dp"
         android:layout_width="70dp"
