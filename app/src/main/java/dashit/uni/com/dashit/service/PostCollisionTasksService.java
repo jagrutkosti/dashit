@@ -142,11 +142,10 @@ public class PostCollisionTasksService extends Service {
                 String emergencyContact = SP.getString("contact", "NA");
                 String location = "http://maps.google.com/?q=";
                 location += accidentLocation;
-                String message = R.string.sms_message_contact + myName + R.string.sms_message_help +
-                        R.string.sms_message_your_phone_number + myPhoneNumber + "," +
-                        R.string.sms_message_location + location;
+                String message = getString(R.string.sms_message_contact) + myName + getString(R.string.sms_message_help) +
+                        getString(R.string.sms_message_your_phone_number) + myPhoneNumber + "," +
+                        getString(R.string.sms_message_location) + location;
                 String hashMessage = "SHA-256 Hash:" + hashFromFilesAndLocation;
-                System.out.println(message);
                 //Send SMS
                 if (emergencyContact.length() > 2 && !emergencyContact.equalsIgnoreCase("NA")) {
                     try {
