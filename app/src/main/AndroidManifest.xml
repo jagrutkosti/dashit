@@ -63,14 +63,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".view.activity.HistoryActivity"
-            android:label="@string/action_history"
-            android:screenOrientation="portrait">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".view.activity.HomeActivity" />
-        </activity>
-        <activity
             android:name=".view.activity.HistoryVerifyActivity"
             android:label="@string/action_history_verify"
             android:screenOrientation="portrait">

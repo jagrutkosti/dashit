@@ -5,15 +5,18 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.TextView;
+
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -36,12 +39,16 @@ import dashit.uni.com.dashit.service.SensorService;
  */
 public class MainActivity extends AppCompatActivity implements  OnMapReadyCallback, LocationAssistant.Listener{
 
-    private static ImageView imgView;
+    private static ImageView statusIcon;
+    private static TextView currentStatusText;
     private GoogleMap googleMap;
     private LatLng latLng;
     private SupportMapFragment mapFragment;
     private Marker currentLocationMarker;
     private LocationAssistant locationAssistant;
+    private Intent sensorIntent;
+    private Intent backgroundIntent;
+    private static int singleDialog = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,19 +56,20 @@ public class MainActivity extends AppCompatActivity implements  OnMapReadyCallba
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        imgView = (ImageView) findViewById(R.id.status);
+        statusIcon = (ImageView) findViewById(R.id.status);
+        currentStatusText = (TextView) findViewById(R.id.current_status);
 
         //Start the accelerometer monitoring
-        Intent sensorIntent = new Intent(MainActivity.this, SensorService.class);
+        sensorIntent = new Intent(MainActivity.this, SensorService.class);
         sensorIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startService(sensorIntent);
 
         //Start video recording in background
-        Intent backgroundIntent = new Intent(MainActivity.this, BackgroundService.class);
+        backgroundIntent = new Intent(MainActivity.this, BackgroundService.class);
         backgroundIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startService(backgroundIntent);
 
-        FloatingActionButton btnStop = (FloatingActionButton) findViewById(R.id.fab_stop);
+        ImageButton btnStop = (ImageButton) findViewById(R.id.stop_recording);
         btnStop.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 stopService(new Intent(MainActivity.this, BackgroundService.class));
@@ -113,57 +121,63 @@ public class MainActivity extends AppCompatActivity implements  OnMapReadyCallba
     BroadcastReceiver collisionBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, final Intent intent) {
-            AlertDialog.Builder confirmDialogBuilder = new AlertDialog.Builder(MainActivity.this);
-            confirmDialogBuilder.setMessage("Was this a collision?");
-            confirmDialogBuilder.setCancelable(false);
-            confirmDialogBuilder.setTitle("Please confirm");
+            if(singleDialog == 1){
+                AlertDialog.Builder confirmDialogBuilder = new AlertDialog.Builder(MainActivity.this);
+                confirmDialogBuilder.setMessage("Was this a collision?");
+                confirmDialogBuilder.setCancelable(false);
+                confirmDialogBuilder.setTitle("Please confirm");
 
-            confirmDialogBuilder.setPositiveButton(
-                    "Yes",
-                    new DialogInterface.OnClickListener() {
-                        //Confirm collision and then notify BackgroundService of the same
-                        public void onClick(DialogInterface dialog, int id) {
+                confirmDialogBuilder.setPositiveButton(
+                        "Yes",
+                        new DialogInterface.OnClickListener() {
+                            //Confirm collision and then notify BackgroundService of the same
+                            public void onClick(DialogInterface dialog, int id) {
+                                stopService(sensorIntent);
+                                Intent collisionConfirmedIntent = new Intent();
+                                collisionConfirmedIntent.setAction("com.collisionConfirmed.Broadcast");
+                                collisionConfirmedIntent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
+                                collisionConfirmedIntent.putExtra("accidentLocation", (String) intent.getExtras().get("accidentLocation"));
+                                sendBroadcast(collisionConfirmedIntent);
+                                dialog.cancel();
+                            }
+                        });
+
+                confirmDialogBuilder.setNegativeButton(
+                        "No",
+                        new DialogInterface.OnClickListener() {
+                            //False Positive
+                            public void onClick(DialogInterface dialog, int id) {
+                                singleDialog = 0;
+                                statusIcon.setImageResource(R.drawable.green_dot);
+                                currentStatusText.setText(R.string.activity_main_current_status_safe);
+                                currentStatusText.setTextColor(Color.parseColor("#669900"));
+                                dialog.cancel();
+                            }
+                        });
+
+                final AlertDialog confirmDialog = confirmDialogBuilder.create();
+                confirmDialog.setCanceledOnTouchOutside(false);
+                confirmDialog.setCancelable(false);
+                confirmDialog.show();
+
+                final Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(confirmDialog.isShowing()){
+                            //No User Input. Confirm Collision Automatically.
+                            confirmDialog.cancel();
+                            stopService(sensorIntent);
                             Intent collisionConfirmedIntent = new Intent();
                             collisionConfirmedIntent.setAction("com.collisionConfirmed.Broadcast");
                             collisionConfirmedIntent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
                             collisionConfirmedIntent.putExtra("accidentLocation", (String) intent.getExtras().get("accidentLocation"));
                             sendBroadcast(collisionConfirmedIntent);
-                            dialog.cancel();
                         }
-                    });
 
-            confirmDialogBuilder.setNegativeButton(
-                    "No",
-                    new DialogInterface.OnClickListener() {
-                        //False Positive
-                        public void onClick(DialogInterface dialog, int id) {
-                            imgView.setImageResource(R.drawable.green_dot);
-                            dialog.cancel();
-                        }
-                    });
-
-            final AlertDialog confirmDialog = confirmDialogBuilder.create();
-            confirmDialog.setCanceledOnTouchOutside(false);
-            confirmDialog.setCancelable(false);
-            confirmDialog.show();
-
-            final Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    if(confirmDialog.isShowing()){
-                        //No User Input. Confirm Collision Automatically.
-                        confirmDialog.cancel();
-                        Intent collisionConfirmedIntent = new Intent();
-                        collisionConfirmedIntent.setAction("com.collisionConfirmed.Broadcast");
-                        collisionConfirmedIntent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
-                        collisionConfirmedIntent.putExtra("accidentLocation", (String) intent.getExtras().get("accidentLocation"));
-                        sendBroadcast(collisionConfirmedIntent);
                     }
-
-                }
-            }, 10 * 1000);
-
+                }, 10 * 1000);
+            }
         }
     };
 
@@ -234,7 +248,10 @@ public class MainActivity extends AppCompatActivity implements  OnMapReadyCallba
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            imgView.setImageResource(R.drawable.carcollision);
+            statusIcon.setImageResource(R.drawable.carcollision);
+            currentStatusText.setText(R.string.activity_main_current_status_collision);
+            currentStatusText.setTextColor(Color.RED);
+            singleDialog++;
             Intent collisionDetectionFromLocation = new Intent("COLLISION_DETECTED_INTERNAL");
             collisionDetectionFromLocation.putExtra("accidentLocation", (String) intent.getExtras().get("accidentLocation"));
             context.sendBroadcast(collisionDetectionFromLocation);

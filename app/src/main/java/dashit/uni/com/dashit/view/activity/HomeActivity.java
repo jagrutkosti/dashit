@@ -2,6 +2,7 @@ package dashit.uni.com.dashit.view.activity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -27,9 +28,10 @@ public class HomeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_home);
 
         //Star the MainActivity that is responsible for the main application logic
-        ImageButton btnStart = (ImageButton) findViewById(R.id.start);
+        final ImageButton btnStart = (ImageButton) findViewById(R.id.start);
         btnStart.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                btnStart.setColorFilter(Color.WHITE);
                 Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
