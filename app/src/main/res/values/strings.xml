@@ -64,11 +64,11 @@
     <string name="preference_name_summary_set">Your name: </string>
     <string name="preference_name_summary_not_set">Your name: Not set</string>
     <string name="preference_phone_title">Phone Number</string>
-    <string name="preference_phone_dialogMessage">Please add county code. Max length: 15</string>
+    <string name="preference_phone_dialogMessage">Please add country code. Max length: 15</string>
     <string name="preference_phone_summary_set">Your phone number: </string>
     <string name="preference_phone_summary_not_set">Your phone number: Not set</string>
     <string name="preference_emergency_title">Emergency Contact</string>
-    <string name="preference_emergency_dialogMessage">Please add county code. Max length: 15</string>
+    <string name="preference_emergency_dialogMessage">Please add country code. Max length: 15</string>
     <string name="preference_emergency_summary_set">Your emergency contact: </string>
     <string name="preference_emergency_summary_not_set">Your emergency contact: Not set</string>
 </resources>
